@@ -1,0 +1,57 @@
+# Nestjs specific
+server/dist
+server/node_modules
+server/build
+server/tmp
+
+# Logs
+server/logs
+server/*.log
+server/npm-debug.log*
+server/pnpm-debug.log*
+server/yarn-debug.log*
+server/yarn-error.log*
+server/lerna-debug.log*
+
+# dotenv environment variable files
+server/.env
+server/.env.development
+server/.env.test
+server/.env.production
+
+# temp directory
+server/.temp
+server/.tmp
+
+# React Native specific
+# dependencies
+client/node_modules/
+
+# Expo
+client/.expo/
+client/dist/
+client/web-build/
+client/expo-env.d.ts
+
+# Native
+client/.kotlin/
+client/*.orig.*
+client/*.jks
+client/*.p8
+client/*.p12
+client/*.key
+client/*.mobileprovision
+
+# Metro
+client/.metro-health-check*
+
+# debug
+client/npm-debug.*
+
+# local env files
+client/.env*
+
+# typescript
+client/*.tsbuildinfo
+
+client/app-example
