@@ -3,7 +3,10 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
+
+import UserIdentity from './user-identity.entity';
 
 @Entity('users')
 export default class User {
@@ -22,9 +25,12 @@ export default class User {
   @Column({ nullable: true })
   picture: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   modifiedAt: Date;
+
+  @OneToMany(() => UserIdentity, (identity) => identity.user)
+  identities: UserIdentity[];
 }
