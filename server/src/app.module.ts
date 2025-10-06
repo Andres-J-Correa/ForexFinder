@@ -15,6 +15,7 @@ import { UsersModule } from './users/users.module';
 
 //config
 import { envValidationSchema } from '@config/validation/env.validation';
+import { AuthModule } from './auth/auth.module';
 import databaseConfig from '@config/database.config';
 
 @Module({
@@ -42,6 +43,8 @@ import databaseConfig from '@config/database.config';
     // ShopsModule,
 
     UsersModule,
+
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

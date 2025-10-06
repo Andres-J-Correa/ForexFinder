@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 
 import User from './user.entity';
-import { oAuthProviders } from '@/common/constants/oAuthProviders';
+import { oAuthProviders } from '@/common/constants/oauth-providers';
 
 @Entity('user_identities')
 export default class UserIdentity {

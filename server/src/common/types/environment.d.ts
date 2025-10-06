@@ -9,5 +9,9 @@ declare namespace NodeJS {
     DB_PASSWORD: string;
     DB_NAME: string;
     DB_SYNCHRONIZE: boolean;
+    AUTH_JWT_SECRET: string;
+    AUTH_JWT_EXPIRES_IN: string;
+    AUTH_JWT_REFRESH_SECRET: string;
+    AUTH_JWT_REFRESH_EXPIRES_IN: string;
   }
 }
