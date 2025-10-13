@@ -1,11 +1,9 @@
 //types
-import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 //libs
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 
 //modules
 import { AppController } from './app.controller';
@@ -27,18 +25,7 @@ import databaseConfig from '@config/database.config';
       load: [databaseConfig],
     }),
 
-    TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const dbOptions = configService.get<TypeOrmModuleOptions>('database');
-
-        if (!dbOptions) {
-          throw new Error('Database configuration not found');
-        }
-
-        return dbOptions;
-      },
-    }),
+    TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
 
     // ShopsModule,
 
@@ -49,8 +36,4 @@ import databaseConfig from '@config/database.config';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-  constructor(private dataSource: DataSource) {
-    console.log(dataSource.driver.database);
-  }
-}
+export class AppModule {}

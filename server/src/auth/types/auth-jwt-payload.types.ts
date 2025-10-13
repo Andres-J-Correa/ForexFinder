@@ -1,3 +1,3 @@
 export interface AuthJwtPayload {
-  sub: string;
+  sub: number;
 }

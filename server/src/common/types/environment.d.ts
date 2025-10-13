@@ -8,10 +8,13 @@ declare namespace NodeJS {
     DB_USERNAME: string;
     DB_PASSWORD: string;
     DB_NAME: string;
-    DB_SYNCHRONIZE: boolean;
+    DB_SYNCHRONIZE: number;
     AUTH_JWT_SECRET: string;
     AUTH_JWT_EXPIRES_IN: string;
     AUTH_JWT_REFRESH_SECRET: string;
     AUTH_JWT_REFRESH_EXPIRES_IN: string;
+    GOOGLE_OAUTH_CLIENT_ID: string;
+    GOOGLE_OAUTH_SECRET: string;
+    GOOGLE_OAUTH_CALLBACK_URL: string;
   }
 }

@@ -1,4 +1,8 @@
-export interface JwtConfig {
+import type { JwtModuleOptions } from '@nestjs/jwt';
+
+export interface JwtConfig extends JwtModuleOptions {
   secret: string;
-  expiresIn: string;
+  signOptions: {
+    expiresIn: string;
+  };
 }
