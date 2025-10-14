@@ -5,19 +5,19 @@ import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 
 //modules
-import { AuthService } from './auth.service';
+import { UsersModule } from '@/users/users.module';
 import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { UsersService } from '@/users/users.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtGuard } from './guards/jwt/jwt.guard';
-import { UsersService } from '@/users/users.service';
-import { GoogleGuard } from './guards/google/google.guard';
 import { GoogleStrategy } from './strategies/google-oauth.strategy';
+import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 
 //config
 import jwtConfig from './config/jwt.config';
 import googleOauthConfig from './config/google-oauth.config';
 import jwtRefreshConfig from './config/jwt-refresh.config';
-import { UsersModule } from '@/users/users.module';
 
 @Module({
   imports: [
@@ -30,11 +30,11 @@ import { UsersModule } from '@/users/users.module';
   controllers: [AuthController],
   providers: [
     AuthService,
-    JwtStrategy,
-    { provide: APP_GUARD, useClass: JwtGuard },
     UsersService,
+    JwtStrategy,
+    JwtRefreshStrategy,
     GoogleStrategy,
-    GoogleGuard,
+    { provide: APP_GUARD, useClass: JwtGuard },
   ],
 })
 export class AuthModule {}
