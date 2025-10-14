@@ -50,9 +50,7 @@ export class UsersService {
       );
 
       if (!affected) {
-        throw new InternalServerErrorException(
-          'Error updating user refresh token',
-        );
+        throw new Error('No rows affected');
       }
     } catch (error) {
       this.logger.error(
