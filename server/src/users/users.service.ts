@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import User from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -8,40 +8,64 @@ import { UserCreateDto } from './dto/user-create.dto';
 export class UsersService {
   constructor(@InjectRepository(User) private UserRepo: Repository<User>) {}
 
-  async getUserIdByEmail(email: string): Promise<number> {
-    const user = await this.UserRepo.findOne({
-      where: { email },
-      select: ['id'],
-    });
+  async getUserIdByEmail(email: string): Promise<number | null> {
+    let userId: number | null = null;
 
-    const userId = user?.id ?? 0;
+    try {
+      const user = await this.UserRepo.findOne({
+        where: { email },
+        select: ['id'],
+      });
+      userId = user?.id ?? null;
+    } catch (error) {
+      Logger.error('getUserIdByEmail failed.', (error as Error).stack);
+      throw new Error('Error fetching user by email');
+    }
 
     return userId;
   }
 
   async create(model: UserCreateDto) {
-    const userInstance = this.UserRepo.create(model);
-    const newUser = await this.UserRepo.save(userInstance);
-    return newUser.id;
+    try {
+      const userInstance = this.UserRepo.create(model);
+      const newUser = await this.UserRepo.save(userInstance);
+      return newUser.id;
+    } catch (error) {
+      Logger.error('Creating user failed.', (error as Error).stack);
+      throw new Error('Error creating user');
+    }
   }
 
   async updateHashedRefreshToken(userId: number, hashedRefreshToken: string) {
-    const { affected } = await this.UserRepo.update(
-      { id: userId },
-      { hashedRefreshToken },
-    );
+    try {
+      const { affected } = await this.UserRepo.update(
+        { id: userId },
+        { hashedRefreshToken },
+      );
 
-    if (!affected) {
+      if (!affected) {
+        throw new Error('Error updating user refresh token');
+      }
+    } catch (error) {
+      Logger.error('updateHashedRefreshToken failed.', (error as Error).stack);
       throw new Error('Error updating user refresh token');
     }
   }
 
   async getHashedRefreshToken(userId: number) {
-    const user = await this.UserRepo.findOne({
-      where: { id: userId },
-      select: ['hashedRefreshToken'],
-    });
+    let hashedToken: string | null = null;
 
-    return user?.hashedRefreshToken;
+    try {
+      const user = await this.UserRepo.findOne({
+        where: { id: userId },
+        select: ['hashedRefreshToken'],
+      });
+
+      hashedToken = user?.hashedRefreshToken ?? null;
+    } catch (error) {
+      Logger.error('getHashedRefreshToken failed.', (error as Error).stack);
+    }
+
+    return hashedToken;
   }
 }

@@ -1,7 +1,11 @@
 import type { ConfigType } from '@nestjs/config';
 import type { Request } from 'express';
 
-import { Inject } from '@nestjs/common';
+import {
+  Inject,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 
@@ -29,17 +33,28 @@ export class JwtRefreshStrategy extends PassportStrategy(
   async validate(
     req: Request,
     payload: AuthJwtPayload,
-  ): Promise<AuthJwtPayload | undefined> {
+  ): Promise<AuthJwtPayload> {
     const refreshToken = req.get('authorization')?.replace('Bearer', '').trim();
 
-    let valid = false;
-    if (refreshToken) {
-      valid = await this.authService.validateRefreshToken(
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token sent in request.');
+    }
+
+    try {
+      const valid = await this.authService.validateRefreshToken(
         payload.sub,
         refreshToken,
       );
-    }
 
-    if (valid) return payload;
+      if (!valid) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      return payload;
+    } catch (error) {
+      if (error instanceof UnauthorizedException) throw error;
+
+      throw new InternalServerErrorException(error);
+    }
   }
 }

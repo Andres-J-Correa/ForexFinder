@@ -1,7 +1,12 @@
 import type { AuthJwtPayload } from './types/auth-jwt-payload.types';
 import type { ConfigType } from '@nestjs/config';
 
-import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  UnauthorizedException,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 
@@ -9,7 +14,6 @@ import { UsersService } from '@/users/users.service';
 import { UserCreateDto } from '@/users/dto/user-create.dto';
 
 import jwtRefreshConfig from './config/jwt-refresh.config';
-import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +26,15 @@ export class AuthService {
 
   async login(userId: number) {
     const tokens = await this.generateTokens(userId);
-    const hashedRefreshToken = await argon2.hash(tokens.refreshToken);
+
+    let hashedRefreshToken: string;
+
+    try {
+      hashedRefreshToken = await argon2.hash(tokens.refreshToken);
+    } catch (error) {
+      Logger.error('Hashing refresh token failed.', (error as Error).stack);
+      throw new UnauthorizedException('Failed to login');
+    }
 
     await this.usersService.updateHashedRefreshToken(
       userId,
@@ -43,12 +55,17 @@ export class AuthService {
   async generateTokens(userId: number) {
     const payload: AuthJwtPayload = { sub: userId };
 
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload),
-      this.jwtService.signAsync(payload, this.refreshConfig),
-    ]);
+    try {
+      const [accessToken, refreshToken] = await Promise.all([
+        this.jwtService.signAsync(payload),
+        this.jwtService.signAsync(payload, this.refreshConfig),
+      ]);
 
-    return { accessToken, refreshToken };
+      return { accessToken, refreshToken };
+    } catch (error) {
+      Logger.error('generateTokens failed.', (error as Error).stack);
+      throw new UnauthorizedException('Failed to generate tokens');
+    }
   }
 
   async validateRefreshToken(userId: number, refreshToken: string) {
@@ -59,7 +76,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const tokenMatches = await argon2.verify(hashedRefreshToken, refreshToken);
+    let tokenMatches: boolean = false;
+    try {
+      tokenMatches = await argon2.verify(hashedRefreshToken, refreshToken);
+    } catch (error) {
+      Logger.error('validateRefreshToken failed.', (error as Error).stack);
+      throw new UnauthorizedException('Invalid refresh token');
+    }
 
     if (!tokenMatches) {
       throw new UnauthorizedException('Invalid refresh token');
