@@ -4,15 +4,18 @@ import { Controller, Get, UseGuards, Req } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
 import { GoogleGuard } from './guards/google/google.guard';
+import { Public } from '@/common/decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @UseGuards(GoogleGuard)
   @Get('google/login')
   googleLogin() {}
 
+  @Public()
   @UseGuards(GoogleGuard)
   @Get('google/callback')
   async googleCallback(@Req() req: Request) {

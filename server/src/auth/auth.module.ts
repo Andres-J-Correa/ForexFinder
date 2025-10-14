@@ -2,7 +2,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_GUARD } from '@nestjs/core';
 
 //modules
 import { AuthService } from './auth.service';
@@ -13,17 +13,15 @@ import { UsersService } from '@/users/users.service';
 import { GoogleGuard } from './guards/google/google.guard';
 import { GoogleStrategy } from './strategies/google-oauth.strategy';
 
-//entities
-import User from '@/users/entities/user.entity';
-
 //config
 import jwtConfig from './config/jwt.config';
 import googleOauthConfig from './config/google-oauth.config';
 import jwtRefreshConfig from './config/jwt-refresh.config';
+import { UsersModule } from '@/users/users.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    UsersModule,
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(jwtRefreshConfig),
@@ -33,7 +31,7 @@ import jwtRefreshConfig from './config/jwt-refresh.config';
   providers: [
     AuthService,
     JwtStrategy,
-    JwtGuard,
+    { provide: APP_GUARD, useClass: JwtGuard },
     UsersService,
     GoogleStrategy,
     GoogleGuard,
