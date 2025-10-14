@@ -12,10 +12,11 @@ import { Strategy, ExtractJwt } from 'passport-jwt';
 import jwtRefreshConfig from '../config/jwt-refresh.config';
 import { AuthJwtPayload } from '../types/auth-jwt-payload.types';
 import { AuthService } from '../auth.service';
+import { jwtRefreshKey } from '../common/constants';
 
 export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
-  'refresh-jwt',
+  jwtRefreshKey,
 ) {
   constructor(
     @Inject(jwtRefreshConfig.KEY)

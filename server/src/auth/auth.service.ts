@@ -24,6 +24,8 @@ export class AuthService {
     private readonly usersService: UsersService,
   ) {}
 
+  private readonly logger = new Logger(AuthService.name);
+
   async login(userId: number) {
     const tokens = await this.generateTokens(userId);
 
@@ -32,7 +34,10 @@ export class AuthService {
     try {
       hashedRefreshToken = await argon2.hash(tokens.refreshToken);
     } catch (error) {
-      Logger.error('Hashing refresh token failed.', (error as Error).stack);
+      this.logger.error(
+        'Hashing refresh token failed.',
+        (error as Error).stack,
+      );
       throw new UnauthorizedException('Failed to login');
     }
 
@@ -63,7 +68,7 @@ export class AuthService {
 
       return { accessToken, refreshToken };
     } catch (error) {
-      Logger.error('generateTokens failed.', (error as Error).stack);
+      this.logger.error('generateTokens failed.', (error as Error).stack);
       throw new UnauthorizedException('Failed to generate tokens');
     }
   }
@@ -80,7 +85,7 @@ export class AuthService {
     try {
       tokenMatches = await argon2.verify(hashedRefreshToken, refreshToken);
     } catch (error) {
-      Logger.error('validateRefreshToken failed.', (error as Error).stack);
+      this.logger.error('validateRefreshToken failed.', (error as Error).stack);
       throw new UnauthorizedException('Invalid refresh token');
     }
 
