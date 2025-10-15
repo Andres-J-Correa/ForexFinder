@@ -16,7 +16,9 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+      // provide a mock request with a user to satisfy JwtGuard/usages
+      const mockReq: any = { user: { id: 1 } };
+      expect(appController.getHello(mockReq)).toBe('Hello World!');
     });
   });
 });
