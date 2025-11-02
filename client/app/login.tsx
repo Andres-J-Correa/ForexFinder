@@ -1,3 +1,4 @@
+import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
@@ -6,18 +7,13 @@ export default function Login() {
 
   return (
     <View style={{ flex: 1, backgroundColor: "rgb(56 56 58)", padding: 16 }}>
-      <Text
-        style={{
-          color: "#fff",
-          fontSize: 22,
-          fontWeight: "700",
-          marginBottom: 12,
-        }}>
-        Login
-      </Text>
-      <Text style={{ color: "#fff", marginBottom: 24 }}>
-        OAuth login with Google will be added later. This is a placeholder.
-      </Text>
+      <GoogleSigninButton
+        size={GoogleSigninButton.Size.Wide}
+        color={GoogleSigninButton.Color.Dark}
+        onPress={() => {
+          // initiate sign in
+        }}
+      />
       <Pressable
         onPress={() => router.back()}
         style={{
