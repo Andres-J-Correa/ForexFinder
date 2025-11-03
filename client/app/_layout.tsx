@@ -1,6 +1,15 @@
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Drawer } from "expo-router/drawer";
+import { useEffect } from "react";
 
 export default function RootLayout() {
+  useEffect(() => {
+    GoogleSignin.configure({
+      scopes: ["openid"],
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID,
+    });
+  }, []);
+
   return (
     <Drawer
       screenOptions={{

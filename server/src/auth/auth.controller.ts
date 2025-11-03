@@ -7,6 +7,7 @@ import {
   Req,
   Post,
   UnauthorizedException,
+  Body,
 } from '@nestjs/common';
 
 import { Public } from '@/common/decorators/public.decorator';
@@ -43,5 +44,11 @@ export class AuthController {
   async googleCallback(@Req() req: Request) {
     const userId: number = req.user as number;
     return await this.authService.login(userId);
+  }
+
+  @Public()
+  @Post('login')
+  login(@Body('idToken') idToken: string) {
+    console.log(idToken);
   }
 }

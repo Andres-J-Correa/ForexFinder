@@ -1,28 +1,50 @@
-import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
-import { useRouter } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  isSuccessResponse,
+} from "@react-native-google-signin/google-signin";
+import { useState } from "react";
+import { ActivityIndicator, View } from "react-native";
+
+import { signInWithGoogle } from "@/services/auth-service";
 
 export default function Login() {
-  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+
+      if (isSuccessResponse(response)) {
+        const idToken = response.data.idToken;
+
+        if (!idToken) throw new Error("empty token");
+        console.log(idToken);
+        const res = await signInWithGoogle(idToken);
+
+        console.log(res);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "rgb(56 56 58)", padding: 16 }}>
-      <GoogleSigninButton
-        size={GoogleSigninButton.Size.Wide}
-        color={GoogleSigninButton.Color.Dark}
-        onPress={() => {
-          // initiate sign in
-        }}
-      />
-      <Pressable
-        onPress={() => router.back()}
-        style={{
-          padding: 12,
-          backgroundColor: "rgb(249 218 71)",
-          borderRadius: 8,
-        }}>
-        <Text style={{ color: "#000", fontWeight: "700" }}>Close</Text>
-      </Pressable>
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#fff" />
+      ) : (
+        <GoogleSigninButton
+          size={GoogleSigninButton.Size.Wide}
+          color={GoogleSigninButton.Color.Dark}
+          onPress={() => handleGoogleSignIn()}
+          disabled={isLoading}
+        />
+      )}
     </View>
   );
 }
