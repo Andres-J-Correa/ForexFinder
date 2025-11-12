@@ -81,4 +81,26 @@ export class UsersService {
       );
     }
   }
+
+  async getUserById(userId: number) {
+    try {
+      const user = await this.userRepo.findOne({
+        where: { id: userId },
+        select: ['firstName', 'lastName', 'picture'],
+      });
+
+      if (!user) {
+        throw new InternalServerErrorException('User not found');
+      }
+
+      return {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        picture: user.picture,
+      };
+    } catch (error) {
+      this.logger.error('getUserById failed.', (error as Error).stack);
+      throw new InternalServerErrorException('Error fetching user');
+    }
+  }
 }

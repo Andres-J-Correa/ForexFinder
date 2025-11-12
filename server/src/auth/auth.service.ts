@@ -126,4 +126,8 @@ export class AuthService {
       throw new UnauthorizedException('Failed to verify Google token');
     }
   }
+
+  async getCurrentUser(userId: number) {
+    return await this.usersService.getUserById(userId);
+  }
 }

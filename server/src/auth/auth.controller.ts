@@ -53,4 +53,15 @@ export class AuthController {
     const userId = await this.authService.validateGoogleUser(userProfile);
     return await this.authService.login(userId);
   }
+
+  @Get('current')
+  async getCurrent(@Req() req: Request) {
+    const user = req.user as AuthJwtPayload | undefined;
+
+    if (!user) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+
+    return await this.authService.getCurrentUser(user.sub);
+  }
 }

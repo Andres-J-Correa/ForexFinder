@@ -1,4 +1,7 @@
-import type { LoginResponse } from "@/types/auth-service.types";
+import type {
+  CurrentUserResponse,
+  LoginResponse,
+} from "@/types/auth-service.types";
 import type { AxiosRequestConfig } from "axios";
 import axiosClient from "./axios-client";
 
@@ -41,6 +44,18 @@ export async function refreshTokens(refreshToken: string) {
   if (res.data?.accessToken && res.data?.refreshToken) {
     await saveTokens(res.data.accessToken, res.data.refreshToken);
   }
+
+  return res;
+}
+
+export async function getCurrentUser() {
+  const config: AxiosRequestConfig = {
+    headers: { "Content-Type": "application/json" },
+    url: `${api}/current`,
+    method: "GET",
+  };
+
+  const res = await axiosClient<CurrentUserResponse>(config);
 
   return res;
 }
