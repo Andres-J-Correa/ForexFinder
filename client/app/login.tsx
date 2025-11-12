@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 import { signInWithGoogle } from "@/services/auth-service";
+import { isAxiosError } from "axios";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -21,13 +22,14 @@ export default function Login() {
         const idToken = response.data.idToken;
 
         if (!idToken) throw new Error("empty token");
-        console.log(idToken);
         const res = await signInWithGoogle(idToken);
 
-        console.log(res);
+        console.log(res.data);
       }
     } catch (error) {
-      console.error(error);
+      if (isAxiosError(error)) {
+        console.error(error.response);
+      }
     } finally {
       setIsLoading(false);
     }

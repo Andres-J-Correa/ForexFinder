@@ -9,19 +9,24 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
+import { OAuth2Client } from 'google-auth-library';
 
 import { UsersService } from '@/users/users.service';
 import { UserCreateDto } from '@/users/dto/user-create.dto';
 
 import jwtRefreshConfig from './config/jwt-refresh.config';
+import googleOauthConfig from './config/google-oauth.config';
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject(jwtRefreshConfig.KEY)
     private readonly refreshConfig: ConfigType<typeof jwtRefreshConfig>,
+    @Inject(googleOauthConfig.KEY)
+    private readonly googleOAuthConfig: ConfigType<typeof googleOauthConfig>,
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
+    private readonly googleClient: OAuth2Client,
   ) {}
 
   private readonly logger = new Logger(AuthService.name);
@@ -94,5 +99,31 @@ export class AuthService {
     }
 
     return true;
+  }
+
+  async verifyGoogleToken(tokenId: string): Promise<UserCreateDto> {
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken: tokenId,
+        audience: this.googleOAuthConfig.clientId,
+      });
+
+      const payload = ticket.getPayload();
+      
+      //TODO: email, firstName, lastName may not be present in the payload. Handle this case.
+      if (!payload || !payload.email || !payload.given_name || !payload.family_name) {
+        throw new UnauthorizedException("Invalid token payload");
+      }
+
+      return {
+        email: payload.email,
+        picture: payload.picture,
+        firstName: payload.given_name,
+        lastName: payload.family_name,
+      };
+    } catch (error) {
+      this.logger.error('verifyGoogleToken failed.', (error as Error).stack);
+      throw new UnauthorizedException('Failed to verify Google token');
+    }
   }
 }

@@ -48,7 +48,9 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  login(@Body('idToken') idToken: string) {
-    console.log(idToken);
+  async login(@Body('idToken') idToken: string) {
+    const userProfile = await this.authService.verifyGoogleToken(idToken);
+    const userId = await this.authService.validateGoogleUser(userProfile);
+    return await this.authService.login(userId);
   }
 }

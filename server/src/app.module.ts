@@ -14,6 +14,7 @@ import { UsersModule } from './users/users.module';
 //config
 import { envValidationSchema } from '@config/validation/env.validation';
 import { AuthModule } from './auth/auth.module';
+import { GoogleModule } from './google/google.module';
 import databaseConfig from '@config/database.config';
 
 @Module({
@@ -32,6 +33,8 @@ import databaseConfig from '@config/database.config';
     UsersModule,
 
     AuthModule,
+
+    GoogleModule,
   ],
   controllers: [AppController],
   providers: [AppService],

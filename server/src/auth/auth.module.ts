@@ -1,6 +1,6 @@
 //libs
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigType } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -13,6 +13,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtGuard } from './guards/jwt/jwt.guard';
 import { GoogleStrategy } from './strategies/google-oauth.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { GoogleModule } from '@/google/google.module';
 
 //config
 import jwtConfig from './config/jwt.config';
@@ -26,6 +27,7 @@ import jwtRefreshConfig from './config/jwt-refresh.config';
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(jwtRefreshConfig),
     ConfigModule.forFeature(googleOauthConfig),
+    GoogleModule,
   ],
   controllers: [AuthController],
   providers: [
