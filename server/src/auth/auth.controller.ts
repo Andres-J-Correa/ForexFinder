@@ -58,6 +58,7 @@ export class AuthController {
   async getCurrent(@Req() req: Request) {
     const user = req.user as AuthJwtPayload | undefined;
 
+    
     if (!user) {
       throw new UnauthorizedException('User not authenticated');
     }

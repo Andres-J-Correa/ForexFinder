@@ -4,6 +4,8 @@ import { Drawer } from "expo-router/drawer";
 import { useEffect, useMemo } from "react";
 
 import { CustomDrawerContent } from "@/components/CustomDrawerContent";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { requireEnv } from "@/utils/env-validation";
 
 function DrawerNavigator() {
   const { user, isLoading } = useUser();
@@ -48,15 +50,23 @@ function DrawerNavigator() {
 
 export default function RootLayout() {
   useEffect(() => {
+    const webClientId = requireEnv(
+      "EXPO_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID",
+      process.env.EXPO_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID,
+      "Google OAuth Web Client ID for authentication"
+    );
+
     GoogleSignin.configure({
       scopes: ["openid"],
-      webClientId: process.env.EXPO_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID,
+      webClientId,
     });
   }, []);
 
   return (
-    <UserProvider>
-      <DrawerNavigator />
-    </UserProvider>
+    <ErrorBoundary>
+      <UserProvider>
+        <DrawerNavigator />
+      </UserProvider>
+    </ErrorBoundary>
   );
 }

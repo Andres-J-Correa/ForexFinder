@@ -1,5 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 
+import { handleError } from "@/utils/error-handler";
+
 const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
 
@@ -24,7 +26,11 @@ export async function getAccessToken(): Promise<string | null> {
   try {
     return await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
   } catch (error) {
-    console.error("Error getting access token:", error);
+    handleError(
+      error,
+      "token-storage.getAccessToken",
+      "Failed to retrieve access token"
+    );
     return null;
   }
 }
@@ -36,7 +42,11 @@ export async function getRefreshToken(): Promise<string | null> {
   try {
     return await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
   } catch (error) {
-    console.error("Error getting refresh token:", error);
+    handleError(
+      error,
+      "token-storage.getRefreshToken",
+      "Failed to retrieve refresh token"
+    );
     return null;
   }
 }
@@ -49,7 +59,11 @@ export async function clearTokens(): Promise<void> {
     await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
     await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
   } catch (error) {
-    console.error("Error clearing tokens:", error);
+    handleError(
+      error,
+      "token-storage.clearTokens",
+      "Failed to clear tokens"
+    );
   }
 }
 

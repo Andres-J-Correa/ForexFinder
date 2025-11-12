@@ -1,4 +1,5 @@
 import type { LoginResponse } from "@/types/auth-service.types";
+import { handleError } from "@/utils/error-handler";
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { API_HOST_PREFIX } from "./service-helpers";
 import { getAccessToken, getRefreshToken, saveTokens } from "./token-storage";
@@ -58,6 +59,11 @@ axiosClient.interceptors.request.use(
     return config;
   },
   (error) => {
+    handleError(
+      error,
+      "axios-client.requestInterceptor",
+      "Request configuration failed"
+    );
     return Promise.reject(error);
   }
 );
@@ -109,10 +115,24 @@ axiosClient.interceptors.response.use(
 
         return axiosClient(originalRequest);
       } catch (refreshError) {
+        handleError(
+          refreshError,
+          "axios-client.tokenRefresh",
+          "Token refresh failed"
+        );
         processQueue(refreshError as AxiosError, null);
         isRefreshing = false;
         return Promise.reject(refreshError);
       }
+    }
+
+    // Log non-401 errors or 401 errors that can't be retried
+    if (error.response?.status !== 401 || originalRequest._retry) {
+      handleError(
+        error,
+        "axios-client.responseInterceptor",
+        "API request failed"
+      );
     }
 
     return Promise.reject(error);

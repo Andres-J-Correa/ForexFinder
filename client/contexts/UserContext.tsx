@@ -1,7 +1,11 @@
 import { getCurrentUser } from "@/services/auth-service";
 import { clearTokens, getAccessToken } from "@/services/token-storage";
 import type { User } from "@/types/auth-service.types";
-import { isAxiosError } from "axios";
+import {
+    handleError,
+    isAuthenticationError,
+} from "@/utils/error-handler";
+import { logger } from "@/utils/logger";
 import {
     createContext,
     ReactNode,
@@ -29,7 +33,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const fetchCurrentUser = useCallback(async () => {
     try {
       const accessToken = await getAccessToken();
-      console.log("accessToken", accessToken);
       if (!accessToken) {
         setUser(null);
         setIsLoading(false);
@@ -44,14 +47,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true);
       }
     } catch (error) {
-      if (isAxiosError(error)) {
-        // If 401, user is not authenticated
-        if (error.response?.status === 401) {
-          setUser(null);
-          setIsAuthenticated(false);
-        }
+      const errorResult = handleError(
+        error,
+        "UserContext.fetchCurrentUser",
+        "Failed to fetch user information"
+      );
+
+      // If authentication error, clear user state
+      if (isAuthenticationError(error)) {
+        setUser(null);
+        setIsAuthenticated(false);
       }
-      console.error("Error fetching current user:", error);
     } finally {
       setIsLoading(false);
     }
@@ -59,14 +65,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      console.log("clearing tokens");
+      logger.log("Clearing tokens");
       await clearTokens();
     } catch (error) {
-      console.error("Error during logout:", error);
-
+      handleError(
+        error,
+        "UserContext.logout",
+        "Failed to log out completely"
+      );
     } finally {
-        setUser(null);
-        setIsAuthenticated(false);
+      setUser(null);
+      setIsAuthenticated(false);
     }
   };
 
@@ -85,8 +94,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if(isAuthenticated) {
-        console.log("fetching current user");
+    if (isAuthenticated) {
+      logger.log("Fetching current user");
       fetchCurrentUser();
     }
   }, [isAuthenticated, fetchCurrentUser]);

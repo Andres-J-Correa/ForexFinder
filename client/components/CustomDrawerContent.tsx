@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import { Image, Pressable, Text, View } from "react-native";
 
 import { useUser } from "@/contexts/UserContext";
+import { handleError } from "@/utils/error-handler";
 
 export function CustomDrawerContent(props: any) {
   const { logout, user, isLoading } = useUser();
@@ -23,7 +24,11 @@ export function CustomDrawerContent(props: any) {
       // Close drawer and redirect to login
       router.replace("/login");
     } catch (error) {
-      console.error("Error during logout:", error);
+      handleError(
+        error,
+        "CustomDrawerContent.handleLogout",
+        "Error during logout"
+      );
       // Still logout even if Google sign out fails
       await logout();
       router.replace("/login");

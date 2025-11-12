@@ -9,7 +9,7 @@ import { ActivityIndicator, View } from "react-native";
 
 import { useUser } from "@/contexts/UserContext";
 import { signInWithGoogle } from "@/services/auth-service";
-import { isAxiosError } from "axios";
+import { handleError } from "@/utils/error-handler";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -44,9 +44,12 @@ export default function Login() {
         }
       }
     } catch (error) {
-      if (isAxiosError(error)) {
-        console.error(error.response);
-      }
+      handleError(
+        error,
+        "Login.handleGoogleSignIn",
+        "Failed to sign in with Google"
+      );
+      // Note: User feedback could be added here using a toast/alert
     } finally {
       setIsLoading(false);
     }
