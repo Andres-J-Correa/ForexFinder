@@ -8,17 +8,24 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import type { Request as ExpressRequest } from 'express';
 
 import { LocationTokensService } from './location-tokens.service';
 import { GenerateLocationTokenDto } from './dto/generate-location-token.dto';
 import { LocationTokenResponseDto } from './dto/location-token-response.dto';
-// TODO: Import JwtAuthGuard and RolesGuard when implemented in Phase 3
-// import { JwtAuthGuard } from '@/auth/guards/jwt/jwt.guard';
-// import { RolesGuard } from '@/auth/guards/roles.guard';
-// import { Roles } from '@/common/decorators/roles.decorator';
-// import { UserRole } from '@/users/entities/user.entity';
+import { JwtGuard } from '@/auth/guards/jwt/jwt.guard';
+import { RolesGuard } from '@/auth/guards/roles/roles.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { UserRole } from '@/users/entities/user.entity';
+import type { AuthJwtPayload } from '@/auth/types/auth-jwt-payload.types';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: AuthJwtPayload;
+}
 
 @Controller('admin/location-tokens')
+@UseGuards(JwtGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
 export class LocationTokensController {
   constructor(
     private readonly locationTokensService: LocationTokensService,
@@ -26,14 +33,11 @@ export class LocationTokensController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  // TODO: Add guards in Phase 3: @UseGuards(JwtAuthGuard, RolesGuard), @Roles(UserRole.ADMIN)
   async generateToken(
     @Body() dto: GenerateLocationTokenDto,
-    @Request() req: any, // TODO: Replace with proper Request type with user in Phase 3
+    @Request() req: AuthenticatedRequest,
   ): Promise<LocationTokenResponseDto> {
-    // TODO: Get adminId from authenticated user in Phase 3
-    // For now, using a placeholder - this will be replaced in Phase 3
-    const adminId = (req.user?.sub as number) || 1;
+    const adminId = req.user.sub;
 
     const expirationDays =
       dto.expirationDays ||
@@ -56,10 +60,10 @@ export class LocationTokensController {
   }
 
   @Get()
-  // TODO: Add guards in Phase 3: @UseGuards(JwtAuthGuard, RolesGuard), @Roles(UserRole.ADMIN)
-  async getAllTokens(@Request() req: any): Promise<any[]> {
-    // TODO: Get adminId from authenticated user in Phase 3
-    const adminId = req.user?.sub as number | undefined;
+  async getAllTokens(
+    @Request() req: AuthenticatedRequest,
+  ): Promise<any[]> {
+    const adminId = req.user.sub;
 
     return this.locationTokensService.getAllTokens(adminId);
   }

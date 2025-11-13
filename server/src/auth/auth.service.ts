@@ -63,7 +63,12 @@ export class AuthService {
   }
 
   async generateTokens(userId: number) {
-    const payload: AuthJwtPayload = { sub: userId };
+    // Fetch user role to include in JWT payload
+    const user = await this.usersService.getUserWithRole(userId);
+    const payload: AuthJwtPayload = {
+      sub: userId,
+      role: user?.role,
+    };
 
     try {
       const [accessToken, refreshToken] = await Promise.all([

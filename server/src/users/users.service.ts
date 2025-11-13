@@ -103,4 +103,18 @@ export class UsersService {
       throw new InternalServerErrorException('Error fetching user');
     }
   }
+
+  async getUserWithRole(userId: number) {
+    try {
+      const user = await this.userRepo.findOne({
+        where: { id: userId },
+        select: ['id', 'role'],
+      });
+
+      return user;
+    } catch (error) {
+      this.logger.error('getUserWithRole failed.', (error as Error).stack);
+      throw new InternalServerErrorException('Error fetching user role');
+    }
+  }
 }
