@@ -3,9 +3,16 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
+  Index,
 } from 'typeorm';
 
+export enum UserRole {
+  USER = 'user',
+  ADMIN = 'admin',
+}
+
 @Entity('users')
+@Index('idx_users_role', ['role'])
 export default class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -24,6 +31,13 @@ export default class User {
 
   @Column({ nullable: true })
   hashedRefreshToken: string;
+
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
+  role: UserRole;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

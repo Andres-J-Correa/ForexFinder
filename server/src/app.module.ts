@@ -8,8 +8,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 //modules
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-// import { ShopsModule } from './shops/shops.module';
+import { ShopsModule } from './shops/shops.module';
 import { UsersModule } from './users/users.module';
+import { RatesModule } from './rates/rates.module';
+import { LocationTokensModule } from './location-tokens/location-tokens.module';
 
 //config
 import { envValidationSchema } from '@config/validation/env.validation';
@@ -28,13 +30,17 @@ import databaseConfig from '@config/database.config';
 
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
 
-    // ShopsModule,
-
     UsersModule,
 
     AuthModule,
 
     GoogleModule,
+
+    ShopsModule,
+
+    RatesModule,
+
+    LocationTokensModule,
   ],
   controllers: [AppController],
   providers: [AppService],
