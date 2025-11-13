@@ -30,6 +30,16 @@ function DrawerNavigator() {
     [user, isLoading]
   );
 
+  const adminOptions = useMemo(
+    () => ({
+      title: "Admin",
+      drawerItemStyle: {
+        display: isLoading || user?.role !== "admin" ? "none" : "flex",
+      } as const,
+    }),
+    [user, isLoading]
+  );
+
   return (
     <Drawer
       drawerContent={(props) => <CustomDrawerContent {...props} />}
@@ -44,6 +54,18 @@ function DrawerNavigator() {
       <Drawer.Screen name="index" options={{ title: "Map" }} />
       <Drawer.Screen name="login" options={loginOptions} />
       <Drawer.Screen name="add-shop" options={addShopOptions} />
+      <Drawer.Screen
+        name="admin/index"
+        options={{ ...adminOptions, title: "Admin Dashboard" }}
+      />
+      <Drawer.Screen
+        name="admin/generate-token"
+        options={{ ...adminOptions, title: "Generate Token" }}
+      />
+      <Drawer.Screen
+        name="admin/tokens-list"
+        options={{ ...adminOptions, title: "Tokens List" }}
+      />
     </Drawer>
   );
 }

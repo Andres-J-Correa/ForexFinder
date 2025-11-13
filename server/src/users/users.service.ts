@@ -86,7 +86,7 @@ export class UsersService {
     try {
       const user = await this.userRepo.findOne({
         where: { id: userId },
-        select: ['firstName', 'lastName', 'picture'],
+        select: ['firstName', 'lastName', 'picture', 'role'],
       });
 
       if (!user) {
@@ -97,6 +97,7 @@ export class UsersService {
         firstName: user.firstName,
         lastName: user.lastName,
         picture: user.picture,
+        role: user.role,
       };
     } catch (error) {
       this.logger.error('getUserById failed.', (error as Error).stack);
