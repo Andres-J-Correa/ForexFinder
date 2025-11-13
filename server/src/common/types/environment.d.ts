@@ -16,5 +16,7 @@ declare namespace NodeJS {
     GOOGLE_OAUTH_CLIENT_ID: string;
     GOOGLE_OAUTH_SECRET: string;
     GOOGLE_OAUTH_CALLBACK_URL: string;
+    LOCATION_TOKEN_SECRET: string;
+    LOCATION_TOKEN_DEFAULT_EXPIRATION_DAYS: number;
   }
 }

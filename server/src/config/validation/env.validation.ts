@@ -23,4 +23,9 @@ export const envValidationSchema = Joi.object({
   GOOGLE_OAUTH_CLIENT_ID: Joi.string().required(),
   GOOGLE_OAUTH_SECRET: Joi.string().required(),
   GOOGLE_OAUTH_CALLBACK_URL: Joi.string().required(),
+  LOCATION_TOKEN_SECRET: Joi.string().required(),
+  LOCATION_TOKEN_DEFAULT_EXPIRATION_DAYS: Joi.number()
+    .integer()
+    .min(1)
+    .default(30),
 });

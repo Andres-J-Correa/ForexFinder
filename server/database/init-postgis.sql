@@ -15,6 +15,7 @@ CREATE INDEX IF NOT EXISTS idx_shops_coordinates ON shops USING GIST(coordinates
 CREATE INDEX IF NOT EXISTS idx_rates_shop_currency ON rates(shop_id, from_currency, to_currency);
 CREATE INDEX IF NOT EXISTS idx_rates_currency_time ON rates(from_currency, to_currency, created_at);
 CREATE INDEX IF NOT EXISTS idx_location_tokens_hash ON location_tokens(jwt_hash);
+CREATE INDEX IF NOT EXISTS idx_location_tokens_unique_id ON location_tokens(unique_id);
 CREATE INDEX IF NOT EXISTS idx_location_tokens_used_at ON location_tokens(used_at);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_shops_owner ON shops(owner_user_id);

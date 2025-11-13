@@ -13,6 +13,7 @@ import Shop from '@/shops/entities/shop.entity';
 
 @Entity('location_tokens')
 @Index('idx_location_tokens_hash', ['jwtHash'])
+@Index('idx_location_tokens_unique_id', ['uniqueId'])
 @Index('idx_location_tokens_used_at', ['usedAt'])
 export default class LocationToken {
   @PrimaryGeneratedColumn()
@@ -20,6 +21,9 @@ export default class LocationToken {
 
   @Column({ name: 'jwt_hash', length: 255, unique: true })
   jwtHash: string;
+
+  @Column({ name: 'unique_id', length: 36, unique: true })
+  uniqueId: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 8 })
   latitude: number;
