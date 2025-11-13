@@ -11,6 +11,21 @@ import { Point } from 'typeorm';
 import Shop from './entities/shop.entity';
 import { LocationTokensService } from '@/location-tokens/location-tokens.service';
 
+interface NearbyShopResult {
+  id: number;
+  name: string;
+  contact: string | null;
+  hours: string | null;
+  latitude: number;
+  longitude: number;
+  distance: number; // in meters
+  buyRate: number;
+  sellRate: number;
+  rateAge: number; // in days
+  buyScore: number;
+  sellScore: number;
+}
+
 @Injectable()
 export class ShopsService {
   private readonly logger = new Logger(ShopsService.name);
@@ -110,5 +125,82 @@ export class ShopsService {
     );
 
     return shop;
+  }
+
+  async findNearbyShops(
+    latitude: number,
+    longitude: number,
+    radiusKm: number,
+    fromCurrency: string,
+    toCurrency: string,
+  ): Promise<NearbyShopResult[]> {
+    try {
+      const radiusMeters = radiusKm * 1000;
+      const maxAgeDays = 7;
+      const penaltyFactor = 0.5;
+
+      // Use raw SQL query for PostGIS operations and rate ranking
+      const query = `
+        SELECT 
+          s.id,
+          s.name,
+          s.contact,
+          s.hours,
+          ST_Y(s.coordinates::geometry) as latitude,
+          ST_X(s.coordinates::geometry) as longitude,
+          ST_Distance(
+            s.coordinates::geography,
+            ST_MakePoint($1, $2)::geography
+          ) as distance,
+          r.buy_rate as "buyRate",
+          r.sell_rate as "sellRate",
+          EXTRACT(EPOCH FROM (NOW() - r.created_at)) / 86400.0 as "rateAge",
+          (r.buy_rate + (EXTRACT(EPOCH FROM (NOW() - r.created_at)) / 86400.0 * $6)) as "buyScore",
+          (r.sell_rate + (EXTRACT(EPOCH FROM (NOW() - r.created_at)) / 86400.0 * $6)) as "sellScore"
+        FROM shops s
+        INNER JOIN rates r ON s.id = r.shop_id
+        WHERE 
+          ST_DWithin(
+            s.coordinates::geography,
+            ST_MakePoint($1, $2)::geography,
+            $3
+          )
+          AND r.from_currency = UPPER($4)
+          AND r.to_currency = UPPER($5)
+          AND r.created_at > NOW() - INTERVAL '${maxAgeDays} days'
+        ORDER BY "buyScore" ASC, distance ASC
+        LIMIT 10
+      `;
+
+      const results = await this.shopRepository.query(query, [
+        longitude, // $1
+        latitude, // $2
+        radiusMeters, // $3
+        fromCurrency.toUpperCase(), // $4
+        toCurrency.toUpperCase(), // $5
+        penaltyFactor, // $6 (used in score calculation)
+      ]);
+
+      return results.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        contact: row.contact,
+        hours: row.hours,
+        latitude: parseFloat(row.latitude),
+        longitude: parseFloat(row.longitude),
+        distance: parseFloat(row.distance),
+        buyRate: parseFloat(row.buyRate),
+        sellRate: parseFloat(row.sellRate),
+        rateAge: parseFloat(row.rateAge),
+        buyScore: parseFloat(row.buyScore),
+        sellScore: parseFloat(row.sellScore),
+      }));
+    } catch (error) {
+      this.logger.error(
+        'Failed to find nearby shops',
+        (error as Error).stack,
+      );
+      throw new InternalServerErrorException('Failed to search nearby shops');
+    }
   }
 }
