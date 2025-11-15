@@ -61,6 +61,13 @@ export default function GenerateToken() {
         expirationDays: expDays,
       });
       setGeneratedToken(result.token);
+      
+      // Clear form fields after successful generation
+      setLatitude('');
+      setLongitude('');
+      setExpirationDays('30');
+      
+      Alert.alert('Success', 'Token generated successfully!');
     } catch (error) {
       handleError(
         error,

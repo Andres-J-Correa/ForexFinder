@@ -2,27 +2,19 @@ import { UserProvider, useUser } from "@/contexts/UserContext";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Drawer } from "expo-router/drawer";
 import { useEffect, useMemo } from "react";
+import { ActivityIndicator, View } from "react-native";
 
 import { CustomDrawerContent } from "@/components/CustomDrawerContent";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { requireEnv } from "@/utils/env-validation";
 
-function DrawerNavigator() {
+// Authenticated stack - only shown when user is logged in
+function AuthenticatedStack() {
   const { user, isLoading } = useUser();
-
-  const loginOptions = useMemo(
-    () => ({
-      title: "Login",
-      drawerItemStyle: {
-        display: isLoading || user ? "none" : "flex",
-      } as const,
-    }),
-    [user, isLoading]
-  );
 
   const addShopOptions = useMemo(
     () => ({
-      title: "Add Shop",
+      title: "Register Shop",
       drawerItemStyle: {
         display: isLoading || !user ? "none" : "flex",
       } as const,
@@ -52,8 +44,16 @@ function DrawerNavigator() {
       }}
     >
       <Drawer.Screen name="index" options={{ title: "Map" }} />
-      <Drawer.Screen name="login" options={loginOptions} />
       <Drawer.Screen name="add-shop" options={addShopOptions} />
+      <Drawer.Screen
+        name="shop/rates"
+        options={{
+          title: "My Shop Rates",
+          drawerItemStyle: {
+            display: isLoading || !user ? "none" : "flex",
+          } as const,
+        }}
+      />
       <Drawer.Screen
         name="admin/index"
         options={{ ...adminOptions, title: "Admin Dashboard" }}
@@ -68,6 +68,64 @@ function DrawerNavigator() {
       />
     </Drawer>
   );
+}
+
+// Unauthenticated stack - only shown when user is not logged in
+function UnauthenticatedStack() {
+  return (
+    <Drawer
+      key="unauthenticated" // Key ensures remount on auth state change
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        headerStyle: { backgroundColor: "rgb(56 56 58)" },
+        headerTintColor: "#fff",
+        drawerStyle: { backgroundColor: "rgb(56 56 58)" },
+        drawerActiveTintColor: "rgb(249 218 71)",
+        drawerInactiveTintColor: "#fff",
+      }}
+    >
+      <Drawer.Screen name="index" options={{ title: "Map" }} />
+      <Drawer.Screen
+        name="login"
+        options={{
+          title: "Login",
+          drawerItemStyle: {
+            display: "flex",
+          } as const,
+        }}
+      />
+    </Drawer>
+  );
+}
+
+// Main navigator that conditionally renders stacks based on auth state
+function RootNavigator() {
+  const { isAuthenticated, isLoading, user } = useUser();
+
+  // Show loading indicator while checking auth state
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "rgb(56 56 58)",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size="large" color="rgb(249 218 71)" />
+      </View>
+    );
+  }
+
+  // Conditionally render authenticated or unauthenticated stack
+  // Key includes user ID to force complete remount when different user logs in
+  // This ensures all state is cleared when switching users
+  if (isAuthenticated && user) {
+    return <AuthenticatedStack key={`auth-${user.firstName}-${user.lastName}-${user.picture}`} />;
+  }
+  
+  return <UnauthenticatedStack />;
 }
 
 export default function RootLayout() {
@@ -87,7 +145,7 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <UserProvider>
-        <DrawerNavigator />
+        <RootNavigator />
       </UserProvider>
     </ErrorBoundary>
   );

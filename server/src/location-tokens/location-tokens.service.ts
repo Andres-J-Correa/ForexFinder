@@ -34,13 +34,11 @@ export class LocationTokensService {
   async generateToken(
     latitude: number,
     longitude: number,
-    expirationDays: number,
     adminId: number,
+    expirationDays?: number,
   ): Promise<{ token: string; expiresAt: Date }> {
-    // Calculate expiration date
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + expirationDays);
-
+    
+    const expirationDaysValue = expirationDays ? `${expirationDays}d` : this.locationTokenConfig.signOptions.expiresIn;
     // Generate unique ID for the token
     const uniqueId = randomUUID();
 
@@ -48,18 +46,22 @@ export class LocationTokensService {
     const payload: LocationTokenPayload = {
       lat: latitude,
       lng: longitude,
-      exp: Math.floor(expiresAt.getTime() / 1000), // JWT exp is in seconds
       adminId,
       uniqueId,
     };
 
     // Generate JWT token
     let token: string;
+    let expiresAt: Date;
     try {
       token = await this.jwtService.signAsync(payload, {
         secret: this.locationTokenConfig.secret,
-        expiresIn: `${expirationDays}d`,
+        expiresIn: expirationDaysValue,
       });
+
+      const decodedToken = await this.jwtService.decode(token);
+      expiresAt = new Date(decodedToken.exp * 1000);
+
     } catch (error) {
       this.logger.error(
         'Failed to generate location token JWT',

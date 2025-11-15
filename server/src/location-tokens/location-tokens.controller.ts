@@ -39,16 +39,11 @@ export class LocationTokensController {
   ): Promise<LocationTokenResponseDto> {
     const adminId = req.user.sub;
 
-    const expirationDays =
-      dto.expirationDays ||
-      Number(process.env.LOCATION_TOKEN_DEFAULT_EXPIRATION_DAYS) ||
-      30;
-
     const { token, expiresAt } = await this.locationTokensService.generateToken(
       dto.latitude,
       dto.longitude,
-      expirationDays,
       adminId,
+      dto.expirationDays
     );
 
     return {

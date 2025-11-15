@@ -206,7 +206,7 @@ export default function TokensList() {
               </View>
 
               <Text style={{ color: '#fff', fontSize: 14, marginBottom: 4 }}>
-                Location: {token.latitude.toFixed(6)}, {token.longitude.toFixed(6)}
+                Location: {Number(token.latitude).toFixed(6)}, {Number(token.longitude).toFixed(6)}
               </Text>
 
               <Text style={{ color: '#999', fontSize: 12, marginBottom: 4 }}>

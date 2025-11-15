@@ -1,7 +1,7 @@
 import type {
   GenerateTokenRequest,
   GenerateTokenResponse,
-  LocationTokensResponse,
+  LocationToken
 } from '@/types/admin-service.types';
 import type { AxiosRequestConfig } from 'axios';
 import axiosClient from './axios-client';
@@ -31,7 +31,7 @@ export async function getLocationTokens(): Promise<LocationToken[]> {
     method: 'GET',
   };
 
-  const res = await axiosClient<LocationTokensResponse>(config);
-  return res.data.data || [];
+  const res = await axiosClient<LocationToken[]>(config);
+  return res.data || [];
 }
 

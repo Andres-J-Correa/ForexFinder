@@ -4,13 +4,14 @@ import {
   DrawerItemList,
 } from "@react-navigation/drawer";
 import { useRouter } from "expo-router";
+import { useMemo } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 
 import { useUser } from "@/contexts/UserContext";
 import { handleError } from "@/utils/error-handler";
 
 export function CustomDrawerContent(props: any) {
-  const { logout, user, isLoading } = useUser();
+  const { logout, user, isLoading, isAuthenticated } = useUser();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -35,9 +36,66 @@ export function CustomDrawerContent(props: any) {
     }
   };
 
+  // Filter drawer items based on authentication state
+  const filteredState = useMemo(() => {
+    if (!props.state || !props.state.routes) {
+      return props.state;
+    }
+
+    const filteredRoutes = props.state.routes.filter((route: any) => {
+      const routeName = route.name;
+
+      // If authenticated, hide login
+      if (isAuthenticated && routeName === "login") {
+        return false;
+      }
+
+      // If not authenticated, hide authenticated routes
+      if (!isAuthenticated) {
+        // Only show public routes (index) and login
+        if (routeName === "index" || routeName === "login") {
+          return true;
+        }
+        // Hide all authenticated routes
+        if (
+          routeName === "add-shop" ||
+          routeName.startsWith("shop/") ||
+          routeName.startsWith("admin/")
+        ) {
+          return false;
+        }
+      }
+
+      // If authenticated but not admin, hide admin routes
+      if (isAuthenticated && user?.role !== "admin") {
+        if (routeName.startsWith("admin/")) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    return {
+      ...props.state,
+      routes: filteredRoutes,
+      index: Math.min(
+        props.state.index || 0,
+        Math.max(0, filteredRoutes.length - 1)
+      ),
+    };
+  }, [props.state, isAuthenticated, user?.role]);
+
+  const filteredProps = {
+    ...props,
+    state: filteredState,
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: "rgb(56 56 58)" }}>
-      <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
+      <DrawerContentScrollView
+        {...filteredProps}
+        contentContainerStyle={{ flex: 1 }}>
         {!isLoading && user && (
           <View
             style={{
@@ -68,7 +126,7 @@ export function CustomDrawerContent(props: any) {
             </Text>
           </View>
         )}
-        <DrawerItemList {...props} />
+        <DrawerItemList {...filteredProps} />
         {!isLoading && user && (
           <View style={{ padding: 16, borderTopWidth: 1, borderTopColor: "#333" }}>
             <Pressable

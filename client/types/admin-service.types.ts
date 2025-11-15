@@ -25,7 +25,4 @@ export interface GenerateTokenResponse {
   longitude: number;
 }
 
-export interface LocationTokensResponse {
-  data: LocationToken[];
-}
 

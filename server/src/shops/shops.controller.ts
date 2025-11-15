@@ -100,6 +100,63 @@ export class ShopsController {
     }));
   }
 
+  @Get('my-shops')
+  @UseGuards(JwtGuard)
+  async getMyShops(@Request() req: AuthenticatedRequest) {
+    const user = req.user;
+
+    if (!user) {
+      throw new UnauthorizedException('User must be authenticated');
+    }
+
+    const shops = await this.shopsService.getAllShopsByOwnerId(user.sub);
+
+    return shops.map((shop) => ({
+      id: shop.id,
+      name: shop.name,
+      contact: shop.contact,
+      hours: shop.hours,
+      coordinates: {
+        latitude: (shop.coordinates as any).coordinates[1],
+        longitude: (shop.coordinates as any).coordinates[0],
+      },
+      verified: shop.verified,
+      dateCreated: shop.dateCreated,
+      dateModified: shop.dateModified,
+    }));
+  }
+
+  @Get('my-shop')
+  @UseGuards(JwtGuard)
+  async getMyShop(@Request() req: AuthenticatedRequest) {
+    const user = req.user;
+
+    if (!user) {
+      throw new UnauthorizedException('User must be authenticated');
+    }
+
+    const shop = await this.shopsService.getShopByOwnerId(user.sub);
+
+    if (!shop) {
+      throw new NotFoundException('You do not own a shop');
+    }
+
+    return {
+      id: shop.id,
+      name: shop.name,
+      contact: shop.contact,
+      hours: shop.hours,
+      coordinates: {
+        latitude: (shop.coordinates as any).coordinates[1],
+        longitude: (shop.coordinates as any).coordinates[0],
+      },
+      verified: shop.verified,
+      dateCreated: shop.dateCreated,
+      dateModified: shop.dateModified,
+    };
+  }
+
+
   @Public()
   @Get(':id')
   async getShopById(@Param('id', ParseIntPipe) id: number) {

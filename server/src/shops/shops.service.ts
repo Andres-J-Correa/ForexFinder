@@ -80,6 +80,37 @@ export class ShopsService {
     }
   }
 
+  async getShopByOwnerId(ownerUserId: number): Promise<Shop | null> {
+    try {
+      return await this.shopRepository.findOne({
+        where: { ownerUserId },
+        relations: ['owner'],
+      });
+    } catch (error) {
+      this.logger.error(
+        'Failed to get shop by owner id',
+        (error as Error).stack,
+      );
+      throw new InternalServerErrorException('Failed to fetch shop');
+    }
+  }
+
+  async getAllShopsByOwnerId(ownerUserId: number): Promise<Shop[]> {
+    try {
+      return await this.shopRepository.find({
+        where: { ownerUserId },
+        relations: ['owner'],
+        order: { dateCreated: 'DESC' },
+      });
+    } catch (error) {
+      this.logger.error(
+        'Failed to get shops by owner id',
+        (error as Error).stack,
+      );
+      throw new InternalServerErrorException('Failed to fetch shops');
+    }
+  }
+
   async updateShop(
     id: number,
     updates: Partial<Pick<Shop, 'name' | 'contact' | 'hours'>>,
