@@ -4,6 +4,7 @@ import { Drawer } from "expo-router/drawer";
 import { useEffect, useMemo } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 import { CustomDrawerContent } from "@/components/CustomDrawerContent";
@@ -146,11 +147,13 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <SafeAreaProvider>
-      <UserProvider>
-          <RootNavigator />
-        </UserProvider>
-      </SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <UserProvider>
+            <RootNavigator />
+          </UserProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
     </ErrorBoundary>
   );
 }

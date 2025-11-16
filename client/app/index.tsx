@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -9,13 +9,21 @@ import {
   TextInput,
   View,
   RefreshControl,
+  StyleSheet,
 } from 'react-native';
 import * as Location from 'expo-location';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import MapView, { Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
+import BottomSheet from '@gorhom/bottom-sheet';
 
+import { ShopDetailSheet } from '@/components/ShopDetailSheet';
 import { getNearbyShops } from '@/services/shop-service';
 import type { NearbyShop } from '@/types/shop-service.types';
 import { handleError } from '@/utils/error-handler';
+import {
+  calculateRadiusFromRegion,
+  formatDistance,
+} from '@/utils/map-helpers';
 
 // Common currency codes
 const CURRENCIES = [
@@ -43,8 +51,11 @@ const CURRENCIES = [
 
 const RADIUS_OPTIONS = [1, 2, 5, 10, 20]; // in kilometers
 
+type ViewMode = 'list' | 'map';
+
 export default function Index() {
   const router = useRouter();
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [fromCurrency, setFromCurrency] = useState('USD');
   const [toCurrency, setToCurrency] = useState('EUR');
   const [radius, setRadius] = useState(5); // default 5km
@@ -57,6 +68,16 @@ export default function Index() {
   const [locationPermission, setLocationPermission] = useState<boolean | null>(
     null,
   );
+  const [selectedShop, setSelectedShop] = useState<NearbyShop | null>(null);
+  const [mapRegion, setMapRegion] = useState<Region | null>(null);
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const mapRef = useRef<MapView>(null);
+  const regionChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Request location permission on mount
   useEffect(() => {
@@ -116,8 +137,24 @@ export default function Index() {
         accuracy: Location.Accuracy.Balanced,
       });
 
-      setLatitude(location.coords.latitude.toString());
-      setLongitude(location.coords.longitude.toString());
+      const lat = location.coords.latitude;
+      const lng = location.coords.longitude;
+
+      setLatitude(lat.toString());
+      setLongitude(lng.toString());
+      setUserLocation({ latitude: lat, longitude: lng });
+
+      // Update map region if in map view
+      if (viewMode === 'map' && mapRef.current) {
+        const region: Region = {
+          latitude: lat,
+          longitude: lng,
+          latitudeDelta: 0.05, // ~5km
+          longitudeDelta: 0.05,
+        };
+        setMapRegion(region);
+        mapRef.current.animateToRegion(region, 1000);
+      }
     } catch (error) {
       handleError(
         error,
@@ -130,54 +167,60 @@ export default function Index() {
     }
   };
 
-  const searchShops = useCallback(async () => {
-    if (!fromCurrency || !toCurrency) {
-      Alert.alert('Error', 'Please select both currencies');
-      return;
-    }
-
-    if (fromCurrency === toCurrency) {
-      Alert.alert('Error', 'From and to currencies must be different');
-      return;
-    }
-
-    const lat = parseFloat(latitude);
-    const lng = parseFloat(longitude);
-
-    if (isNaN(lat) || lat < -90 || lat > 90) {
-      Alert.alert('Error', 'Please enter a valid latitude (-90 to 90)');
-      return;
-    }
-
-    if (isNaN(lng) || lng < -180 || lng > 180) {
-      Alert.alert('Error', 'Please enter a valid longitude (-180 to 180)');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const results = await getNearbyShops({
-        lat,
-        lng,
-        radius,
-        fromCurrency,
-        toCurrency,
-      });
-      setShops(results);
-
-      if (results.length === 0) {
-        Alert.alert(
-          'No Shops Found',
-          `No shops found within ${radius}km for ${fromCurrency} to ${toCurrency}. Try increasing the search radius or check a different currency pair.`,
-        );
+  const searchShops = useCallback(
+    async (searchRadius?: number, searchLat?: number, searchLng?: number) => {
+      if (!fromCurrency || !toCurrency) {
+        Alert.alert('Error', 'Please select both currencies');
+        return;
       }
-    } catch (error) {
-      handleError(error, 'Index.searchShops', 'Failed to search shops');
-      Alert.alert('Error', 'Failed to search shops. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [latitude, longitude, radius, fromCurrency, toCurrency]);
+
+      if (fromCurrency === toCurrency) {
+        Alert.alert('Error', 'From and to currencies must be different');
+        return;
+      }
+
+      const lat = searchLat ?? parseFloat(latitude);
+      const lng = searchLng ?? parseFloat(longitude);
+      const searchRadiusValue = searchRadius ?? radius;
+
+      if (isNaN(lat) || lat < -90 || lat > 90) {
+        Alert.alert('Error', 'Please enter a valid latitude (-90 to 90)');
+        return;
+      }
+
+      if (isNaN(lng) || lng < -180 || lng > 180) {
+        Alert.alert('Error', 'Please enter a valid longitude (-180 to 180)');
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const results = await getNearbyShops({
+          lat,
+          lng,
+          radius: searchRadiusValue,
+          fromCurrency,
+          toCurrency,
+        });
+        setShops(results);
+
+        if (results.length === 0 && viewMode === 'list') {
+          Alert.alert(
+            'No Shops Found',
+            `No shops found within ${searchRadiusValue.toFixed(1)}km for ${fromCurrency} to ${toCurrency}. Try increasing the search radius or check a different currency pair.`,
+          );
+        }
+      } catch (error) {
+        handleError(error, 'Index.searchShops', 'Failed to search shops');
+        if (viewMode === 'list') {
+          Alert.alert('Error', 'Failed to search shops. Please try again.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [latitude, longitude, radius, fromCurrency, toCurrency, viewMode],
+  );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -185,37 +228,153 @@ export default function Index() {
     setRefreshing(false);
   }, [searchShops]);
 
-  const formatDistance = (meters: number): string => {
-    if (meters < 1000) {
-      return `${Math.round(meters)}m`;
+  // Handle map region change with debouncing
+  const handleRegionChangeComplete = useCallback(
+    (region: Region) => {
+      setMapRegion(region);
+
+      // Clear existing timeout
+      if (regionChangeTimeoutRef.current) {
+        clearTimeout(regionChangeTimeoutRef.current);
+      }
+
+      // Debounce the search - wait 800ms after user stops moving/zooming
+      regionChangeTimeoutRef.current = setTimeout(() => {
+        if (!fromCurrency || !toCurrency) return;
+
+        // Calculate radius from visible map area
+        const calculatedRadius = calculateRadiusFromRegion(region);
+
+        // Update radius state
+        setRadius(calculatedRadius);
+
+        // Search shops with new region center and calculated radius
+        searchShops(calculatedRadius, region.latitude, region.longitude);
+      }, 800);
+    },
+    [fromCurrency, toCurrency, searchShops],
+  );
+
+  // Manual refresh for map view
+  const handleManualRefresh = useCallback(() => {
+    if (!mapRegion) return;
+    const calculatedRadius = calculateRadiusFromRegion(mapRegion);
+    setRadius(calculatedRadius);
+    searchShops(calculatedRadius, mapRegion.latitude, mapRegion.longitude);
+  }, [mapRegion, searchShops]);
+
+  // Handle marker press - open bottom sheet
+  const handleMarkerPress = useCallback((shop: NearbyShop) => {
+    setSelectedShop(shop);
+    bottomSheetRef.current?.expand();
+  }, []);
+
+  // Initialize map region when location is set or when switching to map view
+  useEffect(() => {
+    if (latitude && longitude && viewMode === 'map') {
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        // If no region set, or if switching to map view, initialize/update region
+        if (!mapRegion || viewMode === 'map') {
+          const region: Region = {
+            latitude: lat,
+            longitude: lng,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          };
+          setMapRegion(region);
+          // Animate to region if map ref exists
+          if (mapRef.current) {
+            mapRef.current.animateToRegion(region, 500);
+          }
+        }
+      }
     }
-    return `${(meters / 1000).toFixed(2)}km`;
-  };
+  }, [latitude, longitude, viewMode]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (regionChangeTimeoutRef.current) {
+        clearTimeout(regionChangeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 16 }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="rgb(249 218 71)"
-          />
-        }>
-        <Text
+      {/* Header with Toggle */}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: 16,
+          borderBottomWidth: 1,
+          borderBottomColor: '#333',
+        }}>
+        <View style={{ flex: 1 }}>
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 24,
+              fontWeight: '700',
+              marginBottom: 4,
+            }}>
+            Find Currency Exchange Shops
+          </Text>
+          <Text style={{ color: '#999', fontSize: 12 }}>
+            Search for nearby shops offering currency exchange rates
+          </Text>
+        </View>
+        <View
           style={{
-            color: '#fff',
-            fontSize: 24,
-            fontWeight: '700',
-            marginBottom: 8,
+            flexDirection: 'row',
+            backgroundColor: '#1f1f1f',
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: '#333',
+            overflow: 'hidden',
           }}>
-          Find Currency Exchange Shops
-        </Text>
-        <Text style={{ color: '#999', fontSize: 14, marginBottom: 24 }}>
-          Search for nearby shops offering currency exchange rates
-        </Text>
+          <Pressable
+            onPress={() => setViewMode('list')}
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              backgroundColor: viewMode === 'list' ? 'rgb(249 218 71)' : 'transparent',
+            }}>
+            <Text
+              style={{
+                color: viewMode === 'list' ? '#000' : '#fff',
+                fontWeight: viewMode === 'list' ? '700' : '400',
+              }}>
+              List
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setViewMode('map')}
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              backgroundColor: viewMode === 'map' ? 'rgb(249 218 71)' : 'transparent',
+            }}>
+            <Text
+              style={{
+                color: viewMode === 'map' ? '#000' : '#fff',
+                fontWeight: viewMode === 'map' ? '700' : '400',
+              }}>
+              Map
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Search Form - Always visible */}
+      <ScrollView
+        style={{ maxHeight: viewMode === 'map' ? 300 : undefined }}
+        contentContainerStyle={{ padding: 16 }}
+        nestedScrollEnabled={true}>
 
         {/* Currency Selection */}
         <View style={{ marginBottom: 16 }}>
@@ -355,11 +514,12 @@ export default function Index() {
           </Pressable>
         </View>
 
-        {/* Radius Selection */}
-        <View style={{ marginBottom: 24 }}>
-          <Text style={{ color: '#fff', marginBottom: 8, fontSize: 16 }}>
-            Search Radius: {radius}km
-          </Text>
+        {/* Radius Selection - Only show in list view */}
+        {viewMode === 'list' && (
+          <View style={{ marginBottom: 24 }}>
+            <Text style={{ color: '#fff', marginBottom: 8, fontSize: 16 }}>
+              Search Radius: {radius.toFixed(1)}km
+            </Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -387,17 +547,27 @@ export default function Index() {
               </Pressable>
             ))}
           </ScrollView>
-        </View>
+          </View>
+        )}
+
+        {/* Map View Radius Info */}
+        {viewMode === 'map' && mapRegion && (
+          <View style={{ marginBottom: 16 }}>
+            <Text style={{ color: '#999', fontSize: 12 }}>
+              Visible area radius: {calculateRadiusFromRegion(mapRegion).toFixed(1)}km
+            </Text>
+          </View>
+        )}
 
         {/* Search Button */}
         <Pressable
-          onPress={searchShops}
+          onPress={() => searchShops()}
           disabled={loading}
           style={{
             padding: 16,
             backgroundColor: 'rgb(249 218 71)',
             borderRadius: 12,
-            marginBottom: 24,
+            marginBottom: viewMode === 'list' ? 24 : 0,
             opacity: loading ? 0.6 : 1,
           }}>
           {loading ? (
@@ -414,8 +584,115 @@ export default function Index() {
             </Text>
           )}
         </Pressable>
+      </ScrollView>
 
-        {/* Results */}
+      {/* Map View */}
+      {viewMode === 'map' && (
+        <View style={{ flex: 1, position: 'relative' }}>
+          {mapRegion ? (
+            <MapView
+              ref={mapRef}
+              provider={PROVIDER_GOOGLE}
+              style={StyleSheet.absoluteFillObject}
+              initialRegion={mapRegion}
+              onRegionChangeComplete={handleRegionChangeComplete}
+              showsUserLocation={true}
+              showsMyLocationButton={false}
+              mapType="standard">
+              {/* User Location Marker */}
+              {userLocation && (
+                <Marker
+                  coordinate={userLocation}
+                  title="Your Location"
+                  pinColor="blue"
+                />
+              )}
+
+              {/* Shop Markers */}
+              {shops.map((shop) => (
+                <Marker
+                  key={shop.id}
+                  coordinate={{
+                    latitude: shop.coordinates.latitude,
+                    longitude: shop.coordinates.longitude,
+                  }}
+                  title={shop.name}
+                  description={`${formatDistance(shop.distance)} • ${shop.rates.fromCurrency} → ${shop.rates.toCurrency}`}
+                  onPress={() => handleMarkerPress(shop)}
+                  pinColor="rgb(249 218 71)"
+                />
+              ))}
+            </MapView>
+          ) : (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: '#1f1f1f',
+              }}>
+              <Text style={{ color: '#999', fontSize: 16, marginBottom: 16 }}>
+                Enter location to view map
+              </Text>
+              <Pressable
+                onPress={getCurrentLocation}
+                style={{
+                  padding: 12,
+                  backgroundColor: 'rgb(249 218 71)',
+                  borderRadius: 8,
+                }}>
+                <Text style={{ color: '#000', fontWeight: '700' }}>
+                  Use My Location
+                </Text>
+              </Pressable>
+            </View>
+          )}
+
+          {/* Manual Refresh Button for Map */}
+          {mapRegion && (
+            <Pressable
+              onPress={handleManualRefresh}
+              disabled={loading}
+              style={{
+                position: 'absolute',
+                bottom: 20,
+                right: 20,
+                backgroundColor: 'rgb(249 218 71)',
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                justifyContent: 'center',
+                alignItems: 'center',
+                elevation: 5,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.25,
+                shadowRadius: 3.84,
+                opacity: loading ? 0.6 : 1,
+              }}>
+              {loading ? (
+                <ActivityIndicator color="#000" />
+              ) : (
+                <Text style={{ color: '#000', fontSize: 24 }}>↻</Text>
+              )}
+            </Pressable>
+          )}
+        </View>
+      )}
+
+      {/* List View */}
+      {viewMode === 'list' && (
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: 16 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="rgb(249 218 71)"
+            />
+          }>
+          {/* Results */}
         {shops.length > 0 && (
           <View>
             <Text
@@ -431,7 +708,8 @@ export default function Index() {
               <Pressable
                 key={shop.id}
                 onPress={() => {
-                  // TODO: Navigate to shop details or show on map
+                  setSelectedShop(shop);
+                  bottomSheetRef.current?.expand();
                 }}
                 style={{
                   backgroundColor: '#1f1f1f',
@@ -524,7 +802,15 @@ export default function Index() {
             </Text>
           </View>
         )}
-      </ScrollView>
+        </ScrollView>
+      )}
+
+      {/* Bottom Sheet for Shop Details */}
+      <ShopDetailSheet
+        shop={selectedShop}
+        bottomSheetRef={bottomSheetRef}
+        onClose={() => setSelectedShop(null)}
+      />
     </SafeAreaView>
   );
 }
