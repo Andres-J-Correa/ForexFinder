@@ -6,7 +6,6 @@ import {
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   View,
   RefreshControl,
   StyleSheet,
@@ -16,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import BottomSheet from '@gorhom/bottom-sheet';
 
+import { CurrencyDropdown } from '@/components/CurrencyDropdown';
 import { ShopDetailSheet } from '@/components/ShopDetailSheet';
 import { getNearbyShops } from '@/services/shop-service';
 import type { NearbyShop } from '@/types/shop-service.types';
@@ -81,18 +81,32 @@ export default function Index() {
 
   // Request location permission on mount
   useEffect(() => {
-    checkLocationPermission();
+    requestLocationOnMount();
   }, []);
 
-  const checkLocationPermission = async () => {
+  const requestLocationOnMount = async () => {
     try {
-      const { status } = await Location.getForegroundPermissionsAsync();
-      setLocationPermission(status === 'granted');
+      // Check current permission status
+      const { status: currentStatus } =
+        await Location.getForegroundPermissionsAsync();
+
+      if (currentStatus === 'granted') {
+        setLocationPermission(true);
+        // Automatically get location if permission already granted
+        await getCurrentLocation();
+      } else {
+        // Request permission
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        setLocationPermission(status === 'granted');
+        if (status === 'granted') {
+          await getCurrentLocation();
+        }
+      }
     } catch (error) {
       handleError(
         error,
-        'Index.checkLocationPermission',
-        'Failed to check location permission',
+        'Index.requestLocationOnMount',
+        'Failed to request location permission',
       );
       setLocationPermission(false);
     }
@@ -106,8 +120,8 @@ export default function Index() {
         await getCurrentLocation();
       } else {
         Alert.alert(
-          'Location Permission Denied',
-          'Please enable location permission in your device settings to use this feature.',
+          'Location Permission Required',
+          'Location permission is required to find nearby shops. Please enable it in your device settings.',
         );
       }
     } catch (error) {
@@ -324,9 +338,6 @@ export default function Index() {
             }}>
             Find Currency Exchange Shops
           </Text>
-          <Text style={{ color: '#999', fontSize: 12 }}>
-            Search for nearby shops offering currency exchange rates
-          </Text>
         </View>
         <View
           style={{
@@ -376,147 +387,40 @@ export default function Index() {
         contentContainerStyle={{ padding: 16 }}
         nestedScrollEnabled={true}>
 
-        {/* Currency Selection */}
-        <View style={{ marginBottom: 16 }}>
-          <Text style={{ color: '#fff', marginBottom: 8, fontSize: 16 }}>
-            From Currency *
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ marginBottom: 8 }}>
-            {CURRENCIES.map((currency) => (
-              <Pressable
-                key={currency}
-                onPress={() => setFromCurrency(currency)}
-                style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
-                  marginRight: 8,
-                  backgroundColor:
-                    fromCurrency === currency
-                      ? 'rgb(249 218 71)'
-                      : '#1f1f1f',
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor:
-                    fromCurrency === currency ? 'rgb(249 218 71)' : '#333',
-                }}>
-                <Text
-                  style={{
-                    color: fromCurrency === currency ? '#000' : '#fff',
-                    fontWeight: fromCurrency === currency ? '700' : '400',
-                  }}>
-                  {currency}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-
-        <View style={{ marginBottom: 16 }}>
-          <Text style={{ color: '#fff', marginBottom: 8, fontSize: 16 }}>
-            To Currency *
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ marginBottom: 8 }}>
-            {CURRENCIES.map((currency) => (
-              <Pressable
-                key={currency}
-                onPress={() => setToCurrency(currency)}
-                style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
-                  marginRight: 8,
-                  backgroundColor:
-                    toCurrency === currency ? 'rgb(249 218 71)' : '#1f1f1f',
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor:
-                    toCurrency === currency ? 'rgb(249 218 71)' : '#333',
-                }}>
-                <Text
-                  style={{
-                    color: toCurrency === currency ? '#000' : '#fff',
-                    fontWeight: toCurrency === currency ? '700' : '400',
-                  }}>
-                  {currency}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Location Input */}
-        <View style={{ marginBottom: 16 }}>
-          <Text style={{ color: '#fff', marginBottom: 8, fontSize: 16 }}>
-            Location *
-          </Text>
-          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-            <TextInput
-              value={latitude}
-              onChangeText={setLatitude}
-              placeholder="Latitude"
-              placeholderTextColor="#999"
-              keyboardType="numeric"
-              style={{
-                flex: 1,
-                backgroundColor: '#1f1f1f',
-                color: '#fff',
-                padding: 12,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: '#333',
-              }}
-            />
-            <TextInput
-              value={longitude}
-              onChangeText={setLongitude}
-              placeholder="Longitude"
-              placeholderTextColor="#999"
-              keyboardType="numeric"
-              style={{
-                flex: 1,
-                backgroundColor: '#1f1f1f',
-                color: '#fff',
-                padding: 12,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: '#333',
-              }}
-            />
+        {/* Currency Selection - Disabled until location is available */}
+        {!latitude || !longitude ? (
+          <View style={{ marginBottom: 16 }}>
+            <Text style={{ color: '#999', fontSize: 12, marginBottom: 8 }}>
+              Set your location first to select currencies
+            </Text>
           </View>
-          <Pressable
-            onPress={getCurrentLocation}
-            disabled={locationLoading}
-            style={{
-              padding: 12,
-              backgroundColor: '#1f1f1f',
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: 'rgb(249 218 71)',
-              opacity: locationLoading ? 0.6 : 1,
-            }}>
-            {locationLoading ? (
-              <ActivityIndicator color="rgb(249 218 71)" />
-            ) : (
-              <Text
-                style={{
-                  color: 'rgb(249 218 71)',
-                  fontWeight: '700',
-                  textAlign: 'center',
-                }}>
-                Use My Location
-              </Text>
-            )}
-          </Pressable>
+        ) : null}
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: 12,
+            marginBottom: 16,
+            opacity: latitude && longitude ? 1 : 0.5,
+          }}>
+          <CurrencyDropdown
+            label="From"
+            selectedCurrency={fromCurrency}
+            currencies={CURRENCIES}
+            onSelect={setFromCurrency}
+            disabled={!latitude || !longitude}
+          />
+          <CurrencyDropdown
+            label="To"
+            selectedCurrency={toCurrency}
+            currencies={CURRENCIES}
+            onSelect={setToCurrency}
+            disabled={!latitude || !longitude}
+          />
         </View>
 
         {/* Radius Selection - Only show in list view */}
         {viewMode === 'list' && (
-          <View style={{ marginBottom: 24 }}>
+          <View style={{ marginBottom: 12 }}>
             <Text style={{ color: '#fff', marginBottom: 8, fontSize: 16 }}>
               Search Radius: {radius.toFixed(1)}km
             </Text>
@@ -550,6 +454,90 @@ export default function Index() {
           </View>
         )}
 
+        {/* Location Status - First step */}
+        {!latitude || !longitude ? (
+          <View
+            style={{
+              backgroundColor: '#1f1f1f',
+              padding: 24,
+              borderRadius: 12,
+              marginBottom: 24,
+              borderWidth: 1,
+              borderColor: '#333',
+              alignItems: 'center',
+            }}>
+            <Text
+              style={{
+                color: '#fff',
+                fontSize: 18,
+                fontWeight: '600',
+                marginBottom: 8,
+                textAlign: 'center',
+              }}>
+              Location Required
+            </Text>
+            <Text
+              style={{
+                color: '#999',
+                fontSize: 14,
+                marginBottom: 16,
+                textAlign: 'center',
+              }}>
+              We need your location to find nearby currency exchange shops
+            </Text>
+            <Pressable
+              onPress={requestLocationPermission}
+              disabled={locationLoading}
+              style={{
+                padding: 16,
+                backgroundColor: 'rgb(249 218 71)',
+                borderRadius: 12,
+                minWidth: 200,
+                opacity: locationLoading ? 0.6 : 1,
+              }}>
+              {locationLoading ? (
+                <ActivityIndicator color="#000" />
+              ) : (
+                <Text
+                  style={{
+                    color: '#000',
+                    fontSize: 16,
+                    fontWeight: '700',
+                    textAlign: 'center',
+                  }}>
+                  Use My Location
+                </Text>
+              )}
+            </Pressable>
+          </View>
+        ) : viewMode === 'list' && (
+          <View style={{ marginBottom: 24 }}>
+            <Pressable
+              onPress={getCurrentLocation}
+              disabled={locationLoading}
+              style={{
+                padding: 8,
+                backgroundColor: '#333',
+                borderRadius: 8,
+                opacity: locationLoading ? 0.6 : 1,
+              }}>
+              {locationLoading ? (
+                <ActivityIndicator color="rgb(249 218 71)" size="small" />
+              ) : (
+                <Text
+                  style={{
+                    color: 'rgb(249 218 71)',
+                    fontSize: 12,
+                    fontWeight: '600',
+                    textAlign: 'center',
+                  }}>
+                  Update Location
+                </Text>
+              )}
+            </Pressable>
+            </View>
+        )}
+
         {/* Map View Radius Info */}
         {viewMode === 'map' && mapRegion && (
           <View style={{ marginBottom: 16 }}>
@@ -562,13 +550,13 @@ export default function Index() {
         {/* Search Button */}
         <Pressable
           onPress={() => searchShops()}
-          disabled={loading}
+          disabled={loading || !latitude || !longitude}
           style={{
             padding: 16,
             backgroundColor: 'rgb(249 218 71)',
             borderRadius: 12,
             marginBottom: viewMode === 'list' ? 24 : 0,
-            opacity: loading ? 0.6 : 1,
+            opacity: loading || !latitude || !longitude ? 0.6 : 1,
           }}>
           {loading ? (
             <ActivityIndicator color="#000" />
@@ -580,16 +568,141 @@ export default function Index() {
                 fontWeight: '700',
                 textAlign: 'center',
               }}>
-              Search Shops
+              {!latitude || !longitude
+                ? 'Set Location First'
+                : 'Search Shops'}
             </Text>
           )}
         </Pressable>
+
+        {viewMode === 'list' && (
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: 16 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="rgb(249 218 71)"
+            />
+          }>
+          {/* Results */}
+        {shops.length > 0 && (
+          <View>
+            <Text
+              style={{
+                color: '#fff',
+                fontSize: 20,
+                fontWeight: '700',
+                marginBottom: 16,
+              }}>
+              Found {shops.length} Shop{shops.length !== 1 ? 's' : ''}
+            </Text>
+            {shops.map((shop) => (
+              <Pressable
+                key={shop.id}
+                onPress={() => {
+                  setSelectedShop(shop);
+                  bottomSheetRef.current?.expand();
+                }}
+                style={{
+                  backgroundColor: '#1f1f1f',
+                  padding: 16,
+                  borderRadius: 12,
+                  marginBottom: 12,
+                  borderWidth: 1,
+                  borderColor: '#333',
+                }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    marginBottom: 8,
+                  }}>
+                  <Text
+                    style={{
+                      color: 'rgb(249 218 71)',
+                      fontSize: 18,
+                      fontWeight: '700',
+                      flex: 1,
+                    }}>
+                    {shop.name}
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#999',
+                      fontSize: 14,
+                      marginLeft: 8,
+                    }}>
+                    {formatDistance(shop.distance)}
+                  </Text>
+                </View>
+
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    gap: 16,
+                    marginBottom: 8,
+                  }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: '#999', fontSize: 12 }}>
+                      Buy Rate
+                    </Text>
+                    <Text style={{ color: '#fff', fontSize: 16 }}>
+                      {shop.rates.buyRate.toFixed(4)}
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: '#999', fontSize: 12 }}>
+                      Sell Rate
+                    </Text>
+                    <Text style={{ color: '#fff', fontSize: 16 }}>
+                      {shop.rates.sellRate.toFixed(4)}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={{ color: '#666', fontSize: 12, marginBottom: 4 }}>
+                  {shop.rates.fromCurrency} → {shop.rates.toCurrency} • Rate
+                  Age: {shop.rates.rateAge.toFixed(1)} days
+                </Text>
+
+                {shop.contact && (
+                  <Text style={{ color: '#999', fontSize: 12, marginTop: 4 }}>
+                    Contact: {shop.contact}
+                  </Text>
+                )}
+
+                {shop.hours && (
+                  <Text style={{ color: '#999', fontSize: 12, marginTop: 2 }}>
+                    Hours: {shop.hours}
+                  </Text>
+                )}
+              </Pressable>
+            ))}
+          </View>
+        )}
+
+        {/* Empty State */}
+        {shops.length === 0 && !loading && (
+          <View
+            style={{
+              padding: 24,
+              alignItems: 'center',
+            }}>
+            <Text style={{ color: '#999', fontSize: 16 }}>
+              No results yet. Use the search above to find nearby shops.
+            </Text>
+          </View>
+        )}
+        </ScrollView>
+      )}
       </ScrollView>
 
       {/* Map View */}
-      {viewMode === 'map' && (
-        <View style={{ flex: 1, position: 'relative' }}>
-          {mapRegion ? (
+      {viewMode === 'map' && mapRegion && !locationLoading && (
+        <View style={{ flex: 1}}>
             <MapView
               ref={mapRef}
               provider={PROVIDER_GOOGLE}
@@ -597,7 +710,7 @@ export default function Index() {
               initialRegion={mapRegion}
               onRegionChangeComplete={handleRegionChangeComplete}
               showsUserLocation={true}
-              showsMyLocationButton={false}
+              showsMyLocationButton={true}
               mapType="standard">
               {/* User Location Marker */}
               {userLocation && (
@@ -623,30 +736,6 @@ export default function Index() {
                 />
               ))}
             </MapView>
-          ) : (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: '#1f1f1f',
-              }}>
-              <Text style={{ color: '#999', fontSize: 16, marginBottom: 16 }}>
-                Enter location to view map
-              </Text>
-              <Pressable
-                onPress={getCurrentLocation}
-                style={{
-                  padding: 12,
-                  backgroundColor: 'rgb(249 218 71)',
-                  borderRadius: 8,
-                }}>
-                <Text style={{ color: '#000', fontWeight: '700' }}>
-                  Use My Location
-                </Text>
-              </Pressable>
-            </View>
-          )}
 
           {/* Manual Refresh Button for Map */}
           {mapRegion && (
