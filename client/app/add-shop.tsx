@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useUser } from '@/contexts/UserContext';
 import { registerShop } from '@/services/shop-service';
@@ -98,6 +99,7 @@ export default function RegisterShop() {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
     <ScrollView
       style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}
       contentContainerStyle={{ padding: 16 }}>
@@ -233,5 +235,6 @@ export default function RegisterShop() {
         </Text>
       </Pressable>
     </ScrollView>
+    </SafeAreaView>
   );
 }

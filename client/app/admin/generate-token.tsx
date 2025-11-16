@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useUser } from '@/contexts/UserContext';
 import { generateLocationToken } from '@/services/admin-service';
@@ -114,6 +115,7 @@ export default function GenerateToken() {
   }
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
     <ScrollView
       style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}
       contentContainerStyle={{ padding: 16 }}>
@@ -276,6 +278,7 @@ export default function GenerateToken() {
         </Text>
       </Pressable>
     </ScrollView>
+    </SafeAreaView>
   );
 }
 

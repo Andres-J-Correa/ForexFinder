@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useUser } from '@/contexts/UserContext';
 import { getMyShops } from '@/services/shop-service';
@@ -277,7 +278,7 @@ export default function ShopRates() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
         {shops.length > 1 && (
           <View style={{ marginBottom: 16 }}>
@@ -610,7 +611,7 @@ export default function ShopRates() {
           </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

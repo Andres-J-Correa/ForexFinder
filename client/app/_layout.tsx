@@ -3,6 +3,8 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Drawer } from "expo-router/drawer";
 import { useEffect, useMemo } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
 
 import { CustomDrawerContent } from "@/components/CustomDrawerContent";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -144,9 +146,11 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
+      <SafeAreaProvider>
       <UserProvider>
-        <RootNavigator />
-      </UserProvider>
+          <RootNavigator />
+        </UserProvider>
+      </SafeAreaProvider>
     </ErrorBoundary>
   );
 }

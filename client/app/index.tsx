@@ -11,6 +11,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import * as Location from 'expo-location';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getNearbyShops } from '@/services/shop-service';
 import type { NearbyShop } from '@/types/shop-service.types';
@@ -192,7 +193,7 @@ export default function Index() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ padding: 16 }}
@@ -524,6 +525,6 @@ export default function Index() {
           </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

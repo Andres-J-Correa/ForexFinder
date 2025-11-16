@@ -6,6 +6,7 @@ import {
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useUser } from "@/contexts/UserContext";
 import { signInWithGoogle } from "@/services/auth-service";
@@ -71,7 +72,7 @@ export default function Login() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "rgb(56 56 58)", padding: 16 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "rgb(56 56 58)", padding: 16 }}>
       {isLoading ? (
         <ActivityIndicator size="large" color="#fff" />
       ) : (
@@ -82,6 +83,6 @@ export default function Login() {
           disabled={isLoading}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }

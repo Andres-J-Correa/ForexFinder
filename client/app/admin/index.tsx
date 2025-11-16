@@ -7,6 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useUser } from '@/contexts/UserContext';
 import { getLocationTokens } from '@/services/admin-service';
@@ -73,7 +74,7 @@ export default function AdminDashboard() {
   const unusedTokens = tokens.filter((t) => t.usedAt === null);
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
       <ScrollView style={{ flex: 1, padding: 16 }}>
         <Text
           style={{
@@ -176,7 +177,7 @@ export default function AdminDashboard() {
           </Text>
         </Pressable>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

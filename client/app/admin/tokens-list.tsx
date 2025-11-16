@@ -7,6 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useUser } from '@/contexts/UserContext';
 import { getLocationTokens } from '@/services/admin-service';
@@ -76,7 +77,7 @@ export default function TokensList() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
       <View style={{ padding: 16, paddingBottom: 8 }}>
         <Text
           style={{
@@ -239,7 +240,7 @@ export default function TokensList() {
           Back
         </Text>
       </Pressable>
-    </View>
+    </SafeAreaView>
   );
 }
 
