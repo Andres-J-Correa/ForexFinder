@@ -1,4 +1,6 @@
 import type {
+  NearbyShop,
+  NearbyShopsQuery,
   RegisterShopRequest,
   RegisterShopResponse,
   Shop,
@@ -72,5 +74,19 @@ export async function updateShop(
 
   const res = await axiosClient<UpdateShopResponse>(config);
   return res.data;
+}
+
+export async function getNearbyShops(
+  query: NearbyShopsQuery,
+): Promise<NearbyShop[]> {
+  const config: AxiosRequestConfig = {
+    headers: { 'Content-Type': 'application/json' },
+    url: `${api}/nearby`,
+    method: 'GET',
+    params: query,
+  };
+
+  const res = await axiosClient<NearbyShop[]>(config);
+  return Array.isArray(res.data) ? res.data : [];
 }
 

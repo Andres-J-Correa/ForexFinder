@@ -179,7 +179,7 @@ export default function RegisterShop() {
       <View style={{ marginBottom: 24 }}>
         <Text style={{ color: '#fff', marginBottom: 8, fontSize: 16 }}>
           Working Hours (optional)
-        </Text>
+      </Text>
         <TextInput
           value={hours}
           onChangeText={setHours}
@@ -217,7 +217,7 @@ export default function RegisterShop() {
               textAlign: 'center',
             }}>
             Register Shop
-          </Text>
+      </Text>
         )}
       </Pressable>
 
