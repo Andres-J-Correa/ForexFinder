@@ -11,13 +11,9 @@ import { CustomDrawerContent } from "@/components/CustomDrawerContent";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { requireEnv } from "@/utils/env-validation";
 
-import Constants from 'expo-constants';
-
 // Authenticated stack - only shown when user is logged in
 function AuthenticatedStack() {
   const { user, isLoading } = useUser();
-
-  console.log(Constants.expoConfig?.extra?.test);
 
   const addShopOptions = useMemo(
     () => ({

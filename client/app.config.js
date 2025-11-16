@@ -18,7 +18,7 @@ export default {
         "android": {
           "config": {
             "googleMaps": {
-              "apiKey": process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY
+              "apiKey": process.env.GOOGLE_MAPS_API_KEY
             }
           },
           "adaptiveIcon": {
@@ -78,7 +78,6 @@ export default {
           "eas": {
             "projectId": "fee52ee9-7dc4-441b-b1f6-86405ce6c964"
           },
-          "test": process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY
         }
       }
 }
