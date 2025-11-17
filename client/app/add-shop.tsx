@@ -99,7 +99,7 @@ export default function RegisterShop() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
     <ScrollView
       style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}
       contentContainerStyle={{ padding: 16 }}>

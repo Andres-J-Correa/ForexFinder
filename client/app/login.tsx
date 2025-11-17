@@ -72,9 +72,9 @@ export default function Login() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "rgb(56 56 58)", padding: 16 }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: "rgb(56 56 58)", padding: 16 }}>
       {isLoading ? (
-        <ActivityIndicator size="large" color="#fff" />
+        <ActivityIndicator size="large" color="#fff" style={{ marginTop: 'auto', marginBottom: 'auto' }} />
       ) : (
         <GoogleSigninButton
           size={GoogleSigninButton.Size.Wide}

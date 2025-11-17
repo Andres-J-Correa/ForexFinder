@@ -77,7 +77,7 @@ export default function TokensList() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
       <View style={{ padding: 16, paddingBottom: 8 }}>
         <Text
           style={{

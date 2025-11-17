@@ -149,9 +149,9 @@ export default function RootLayout() {
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
-          <UserProvider>
+      <UserProvider>
             <RootNavigator />
-          </UserProvider>
+      </UserProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>
     </ErrorBoundary>

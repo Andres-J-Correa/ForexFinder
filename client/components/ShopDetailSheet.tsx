@@ -40,7 +40,7 @@ export function ShopDetailSheet({
       enablePanDownToClose
       backgroundStyle={{ backgroundColor: 'rgb(56 56 58)' }}
       handleIndicatorStyle={{ backgroundColor: 'rgb(249 218 71)' }}>
-      <BottomSheetView style={{ flex: 1, padding: 16 }}>
+      <BottomSheetView style={{ flex: 1, padding: 16, paddingBottom: 24 }}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={{ marginBottom: 16 }}>
             <Text
@@ -165,49 +165,6 @@ export function ShopDetailSheet({
               <Text style={{ color: '#999', fontSize: 14 }}>{shop.hours}</Text>
             </View>
           )}
-
-          {/* Location */}
-          <View
-            style={{
-              backgroundColor: '#1f1f1f',
-              padding: 16,
-              borderRadius: 12,
-              marginBottom: 16,
-            }}>
-            <Text
-              style={{
-                color: '#fff',
-                fontSize: 18,
-                fontWeight: '600',
-                marginBottom: 8,
-              }}>
-              Location
-            </Text>
-            <Text style={{ color: '#999', fontSize: 14 }}>
-              {shop.coordinates.latitude.toFixed(6)},{' '}
-              {shop.coordinates.longitude.toFixed(6)}
-            </Text>
-          </View>
-
-          {/* Close Button */}
-          <Pressable
-            onPress={() => bottomSheetRef.current?.close()}
-            style={{
-              padding: 16,
-              backgroundColor: 'rgb(249 218 71)',
-              borderRadius: 12,
-              marginTop: 8,
-            }}>
-            <Text
-              style={{
-                color: '#000',
-                fontSize: 16,
-                fontWeight: '700',
-                textAlign: 'center',
-              }}>
-              Close
-            </Text>
-          </Pressable>
         </ScrollView>
       </BottomSheetView>
     </BottomSheet>

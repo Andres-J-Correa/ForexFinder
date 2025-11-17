@@ -67,6 +67,13 @@ export default {
             {
               "locationAlwaysAndWhenInUsePermission": "Allow ForexFinder to use your location."
             }
+          ],
+          [
+            "expo-maps",
+            {
+              "requestLocationPermission": true,
+              "locationPermission": "Allow ForexFinder to use your location"
+            }
           ]
         ],
         "experiments": {

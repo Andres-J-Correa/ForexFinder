@@ -34,39 +34,28 @@ function toRad(degrees: number): number {
 }
 
 /**
- * Calculate the radius needed to cover a map region
- * Uses the diagonal distance from center to corner as radius
- * @param region Map region with latitude, longitude, latitudeDelta, longitudeDelta
- * @returns Radius in kilometers (capped at 20km max)
+ * Calculate zoom level from desired radius
+ * Approximates the zoom level needed to show a specific radius in kilometers
+ * @param radiusKm Desired radius in kilometers (1-20km)
+ * @param latitude Latitude for accurate calculation
+ * @returns Zoom level that approximately shows the desired radius
  */
-export function calculateRadiusFromRegion(region: {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-}): number {
-  // Calculate the northeast corner of the visible region
-  const northeastLat = region.latitude + region.latitudeDelta / 2;
-  const northeastLng = region.longitude + region.longitudeDelta / 2;
-
-  // Calculate the southwest corner of the visible region
-  const southwestLat = region.latitude - region.latitudeDelta / 2;
-  const southwestLng = region.longitude - region.longitudeDelta / 2;
-
-  // Calculate diagonal distance (from center to corner)
-  // This ensures all visible area is covered
-  const diagonalDistance = calculateDistance(
-    region.latitude,
-    region.longitude,
-    northeastLat,
-    northeastLng,
-  );
-
-  // Add a small buffer (10%) to ensure edge shops are included
-  const radiusWithBuffer = diagonalDistance * 1.1;
-
-  // Cap at maximum 20km as per API requirements
-  return Math.min(radiusWithBuffer, 20);
+export function calculateZoomFromRadius(radiusKm: number, latitude: number): number {
+  // Approximate formula based on Google Maps zoom levels
+  // At the equator: 1 degree ≈ 111 km
+  // Zoom level formula: zoom ≈ log2(360 * 111 / (radius * 2))
+  
+  // Account for latitude (longitude degrees get smaller away from equator)
+  const latitudeScale = Math.cos(latitude * Math.PI / 180);
+  
+  // Approximate calculation
+  // For a given radius, we want to show roughly 2*radius degrees
+  // Using the formula: zoom ≈ log2(360 * 111 * latitudeScale / (2 * radiusKm))
+  const degreesForRadius = (2 * radiusKm) / (111 * Math.max(latitudeScale, 0.1));
+  const zoom = Math.log2(360 / degreesForRadius);
+  
+  // Clamp zoom between reasonable bounds (10-18)
+  return Math.max(10, Math.min(18, Math.round(zoom * 10) / 10));
 }
 
 /**

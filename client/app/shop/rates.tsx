@@ -278,7 +278,7 @@ export default function ShopRates() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
         {shops.length > 1 && (
           <View style={{ marginBottom: 16 }}>

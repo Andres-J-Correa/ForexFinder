@@ -17,7 +17,7 @@ import { generateLocationToken } from '@/services/admin-service';
 import { handleError } from '@/utils/error-handler';
 
 // TODO: Add Google Maps integration for visual coordinate selection
-// Install: npx expo install react-native-maps or use expo-maps
+// Use expo-maps (already installed) for map integration
 // This would allow clicking on a map to select coordinates instead of manual input
 
 export default function GenerateToken() {
@@ -115,7 +115,7 @@ export default function GenerateToken() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
     <ScrollView
       style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}
       contentContainerStyle={{ padding: 16 }}>

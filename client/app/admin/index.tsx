@@ -74,7 +74,7 @@ export default function AdminDashboard() {
   const unusedTokens = tokens.filter((t) => t.usedAt === null);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }} edges={['bottom']}>
       <ScrollView style={{ flex: 1, padding: 16 }}>
         <Text
           style={{

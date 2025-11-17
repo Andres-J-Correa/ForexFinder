@@ -58,7 +58,6 @@ axiosClient.interceptors.request.use(
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.log("inside request interceptor");
       config.headers['Cache-Control'] = 'no-cache';
       config.headers['Pragma'] = 'no-cache';
     }
