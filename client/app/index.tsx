@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -8,55 +8,59 @@ import {
   Text,
   View,
   StyleSheet,
-} from 'react-native';
-import * as Location from 'expo-location';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { GoogleMaps } from 'expo-maps';
-import BottomSheet from '@gorhom/bottom-sheet';
+} from "react-native";
+import * as Location from "expo-location";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { GoogleMaps } from "expo-maps";
+import BottomSheet from "@gorhom/bottom-sheet";
+import { useImage } from "expo-image";
 
-import { CurrencyDropdown } from '@/components/CurrencyDropdown';
-import { ShopDetailSheet } from '@/components/ShopDetailSheet';
-import { getNearbyShops } from '@/services/shop-service';
-import type { NearbyShop } from '@/types/shop-service.types';
-import { handleError } from '@/utils/error-handler';
-import { formatDistance, calculateZoomFromRadius } from '@/utils/map-helpers';
+import { CurrencyDropdown } from "@/components/CurrencyDropdown";
+import { ShopDetailSheet } from "@/components/ShopDetailSheet";
+import { getNearbyShops } from "@/services/shop-service";
+import type { NearbyShop } from "@/types/shop-service.types";
+import { handleError } from "@/utils/error-handler";
+import { formatDistance, calculateZoomFromRadius } from "@/utils/map-helpers";
 
 // Common currency codes
 const CURRENCIES = [
-  'USD',
-  'EUR',
-  'PHP',
-  'GBP',
-  'JPY',
-  'AUD',
-  'CAD',
-  'CHF',
-  'CNY',
-  'INR',
-  'MXN',
-  'BRL',
-  'ZAR',
-  'SGD',
-  'HKD',
-  'NZD',
-  'KRW',
-  'TRY',
-  'RUB',
-  'AED',
-  'SAR',
+  "USD",
+  "EUR",
+  "PHP",
+  "GBP",
+  "JPY",
+  "AUD",
+  "CAD",
+  "CHF",
+  "CNY",
+  "INR",
+  "MXN",
+  "BRL",
+  "ZAR",
+  "SGD",
+  "HKD",
+  "NZD",
+  "KRW",
+  "TRY",
+  "RUB",
+  "AED",
+  "SAR",
 ];
 
+// Available radius options in km
+const RADIUS_OPTIONS = [0.1, 0.5, 1, 3, 5, 10, 20];
+
 export default function Index() {
-  const [fromCurrency, setFromCurrency] = useState('USD');
-  const [toCurrency, setToCurrency] = useState('EUR');
+  const [fromCurrency, setFromCurrency] = useState("USD");
+  const [toCurrency, setToCurrency] = useState("EUR");
   const [radius, setRadius] = useState(0.1); // default 100m
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
   const [shops, setShops] = useState<NearbyShop[]>([]);
   const [loading, setLoading] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(
-    null,
+    null
   );
   const [selectedShop, setSelectedShop] = useState<NearbyShop | null>(null);
   const [userLocation, setUserLocation] = useState<{
@@ -68,13 +72,7 @@ export default function Index() {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const mapRef = useRef<GoogleMaps.MapView>(null);
 
-  // Available radius options in km
-  const RADIUS_OPTIONS = [0.1, 0.5, 1, 3, 5, 10, 20];
-
-  // Request location permission on mount
-  useEffect(() => {
-    requestLocationOnMount();
-  }, []);
+  const storeIcon = useImage(require("../assets/images/store.png"));
 
   const requestLocationOnMount = async () => {
     try {
@@ -82,23 +80,23 @@ export default function Index() {
       const { status: currentStatus } =
         await Location.getForegroundPermissionsAsync();
 
-      if (currentStatus === 'granted') {
+      if (currentStatus === "granted") {
         setLocationPermission(true);
         // Automatically get location if permission already granted
         await getCurrentLocation();
       } else {
         // Request permission
         const { status } = await Location.requestForegroundPermissionsAsync();
-        setLocationPermission(status === 'granted');
-        if (status === 'granted') {
+        setLocationPermission(status === "granted");
+        if (status === "granted") {
           await getCurrentLocation();
         }
       }
     } catch (error) {
       handleError(
         error,
-        'Index.requestLocationOnMount',
-        'Failed to request location permission',
+        "Index.requestLocationOnMount",
+        "Failed to request location permission"
       );
       setLocationPermission(false);
     }
@@ -109,10 +107,11 @@ export default function Index() {
       setLocationLoading(true);
 
       // First check current permission status
-      const { status: currentStatus } = await Location.getForegroundPermissionsAsync();
+      const { status: currentStatus } =
+        await Location.getForegroundPermissionsAsync();
 
       // If already granted, just get location
-      if (currentStatus === 'granted') {
+      if (currentStatus === "granted") {
         setLocationPermission(true);
         await getCurrentLocation();
         return;
@@ -120,33 +119,33 @@ export default function Index() {
 
       // Request permission (this will show the dialog if not permanently denied)
       const { status } = await Location.requestForegroundPermissionsAsync();
-      setLocationPermission(status === 'granted');
+      setLocationPermission(status === "granted");
 
-      if (status === 'granted') {
+      if (status === "granted") {
         await getCurrentLocation();
       } else {
         // Permission denied - guide user to settings
         Alert.alert(
-          'Location Permission Required',
-          'Location permission is required to find nearby shops. Please enable it in your device settings.',
+          "Location Permission Required",
+          "Location permission is required to find nearby shops. Please enable it in your device settings.",
           [
-            { text: 'Cancel', style: 'cancel' },
+            { text: "Cancel", style: "cancel" },
             {
-              text: 'Open Settings',
+              text: "Open Settings",
               onPress: async () => {
                 await Linking.openSettings();
               },
             },
-          ],
+          ]
         );
       }
     } catch (error) {
       handleError(
         error,
-        'Index.requestLocationPermission',
-        'Failed to request location permission',
+        "Index.requestLocationPermission",
+        "Failed to request location permission"
       );
-      Alert.alert('Error', 'Failed to request location permission.');
+      Alert.alert("Error", "Failed to request location permission.");
     } finally {
       setLocationLoading(false);
     }
@@ -158,7 +157,7 @@ export default function Index() {
 
       // Check if permission is granted
       const { status } = await Location.getForegroundPermissionsAsync();
-      if (status !== 'granted') {
+      if (status !== "granted") {
         await requestLocationPermission();
         setLocationLoading(false);
         return;
@@ -182,10 +181,10 @@ export default function Index() {
     } catch (error) {
       handleError(
         error,
-        'Index.getCurrentLocation',
-        'Failed to get current location',
+        "Index.getCurrentLocation",
+        "Failed to get current location"
       );
-      Alert.alert('Error', 'Failed to get your location. Please try again.');
+      Alert.alert("Error", "Failed to get your location. Please try again.");
     } finally {
       setLocationLoading(false);
     }
@@ -205,7 +204,7 @@ export default function Index() {
       }
 
       if (fromCurrency === toCurrency) {
-        Alert.alert('Error', 'From and to currencies must be different');
+        Alert.alert("Error", "From and to currencies must be different");
         return;
       }
 
@@ -214,13 +213,17 @@ export default function Index() {
       // Calculate and update zoom level
       const newZoom = calculateZoomFromRadius(newRadius, userLocation.latitude);
       setCurrentZoom(newZoom);
-
     },
-    [userLocation, fromCurrency, toCurrency],
+    [userLocation, fromCurrency, toCurrency]
   );
 
+  // Request location permission on mount
   useEffect(() => {
-    if(userLocation && latitude && longitude) {
+    requestLocationOnMount();
+  }, []);
+
+  useEffect(() => {
+    if (userLocation && latitude && longitude) {
       const searchShops = async () => {
         try {
           setLoading(true);
@@ -233,32 +236,49 @@ export default function Index() {
           });
           setShops(results);
         } catch (error) {
-          handleError(error, 'Index.handleRadiusChange', 'Failed to search shops');
+          handleError(
+            error,
+            "Index.handleRadiusChange",
+            "Failed to search shops"
+          );
         } finally {
           setLoading(false);
         }
-      }
+      };
 
       searchShops();
     }
-  }, [currentZoom, userLocation, latitude, longitude, radius, fromCurrency, toCurrency]);
+  }, [
+    currentZoom,
+    userLocation,
+    latitude,
+    longitude,
+    radius,
+    fromCurrency,
+    toCurrency,
+  ]);
 
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: 'rgb(56 56 58)' }}>
+    <SafeAreaView
+      edges={["bottom"]}
+      style={{ flex: 1, backgroundColor: "rgb(56 56 58)" }}
+    >
       {/* Header */}
       <View
         style={{
           padding: 16,
           borderBottomWidth: 1,
-          borderBottomColor: '#333',
-        }}>
+          borderBottomColor: "#333",
+        }}
+      >
         <Text
           style={{
-            color: '#fff',
+            color: "#fff",
             fontSize: 24,
-            fontWeight: '700',
+            fontWeight: "700",
             marginBottom: 4,
-          }}>
+          }}
+        >
           Select Currencies and Find Shops
         </Text>
       </View>
@@ -268,23 +288,24 @@ export default function Index() {
         style={{ maxHeight: 180 }}
         contentContainerStyle={{ padding: 12 }}
         nestedScrollEnabled={true}
-        showsVerticalScrollIndicator={false}>
-
+        showsVerticalScrollIndicator={false}
+      >
         {/* Currency Selection - Disabled until location is available */}
         {!latitude || !longitude ? (
           <View style={{ marginBottom: 16 }}>
-            <Text style={{ color: '#999', fontSize: 12, marginBottom: 8 }}>
+            <Text style={{ color: "#999", fontSize: 12, marginBottom: 8 }}>
               Set your location first to select currencies
             </Text>
           </View>
         ) : null}
         <View
           style={{
-            flexDirection: 'row',
+            flexDirection: "row",
             gap: 12,
             marginBottom: 16,
             opacity: latitude && longitude ? 1 : 0.5,
-          }}>
+          }}
+        >
           <CurrencyDropdown
             label="From"
             selectedCurrency={fromCurrency}
@@ -306,17 +327,19 @@ export default function Index() {
           <View style={{ marginBottom: 16 }}>
             <Text
               style={{
-                color: '#fff',
+                color: "#fff",
                 fontSize: 12,
-                fontWeight: '600',
+                fontWeight: "600",
                 marginBottom: 8,
-              }}>
+              }}
+            >
               Search Radius
             </Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingRight: 12 }}>
+              contentContainerStyle={{ paddingRight: 12 }}
+            >
               {RADIUS_OPTIONS.map((radiusOption) => (
                 <Pressable
                   key={radiusOption}
@@ -328,96 +351,111 @@ export default function Index() {
                     borderRadius: 20,
                     marginRight: 8,
                     backgroundColor:
-                      radius === radiusOption
-                        ? 'rgb(249 218 71)'
-                        : '#333',
+                      radius === radiusOption ? "rgb(249 218 71)" : "#333",
                     borderWidth: 1,
                     borderColor:
-                      radius === radiusOption
-                        ? 'rgb(249 218 71)'
-                        : '#555',
+                      radius === radiusOption ? "rgb(249 218 71)" : "#555",
                     opacity: loading ? 0.6 : 1,
-                  }}>
+                  }}
+                >
                   <Text
                     style={{
-                      color: radius === radiusOption ? '#000' : '#fff',
+                      color: radius === radiusOption ? "#000" : "#fff",
                       fontSize: 12,
-                      fontWeight: radius === radiusOption ? '700' : '500',
-                    }}>
-                    {radiusOption % 1 === 0 ? `${radiusOption}km` : `${radiusOption * 1000}m`}
+                      fontWeight: radius === radiusOption ? "700" : "500",
+                    }}
+                  >
+                    {radiusOption % 1 === 0
+                      ? `${radiusOption}km`
+                      : `${radiusOption * 1000}m`}
                   </Text>
                 </Pressable>
               ))}
             </ScrollView>
           </View>
         )}
-
       </ScrollView>
 
       {locationLoading && (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <ActivityIndicator color="#fff" size="large" />
-          <Text style={{ color: '#fff', fontSize: 18, fontWeight: '600', marginTop: 16 }}>
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 18,
+              fontWeight: "600",
+              marginTop: 16,
+            }}
+          >
             Loading location...
           </Text>
         </View>
       )}
 
-      {!locationPermission && !locationLoading && <View
-        style={{
-          marginTop: 24,
-          backgroundColor: '#1f1f1f',
-          padding: 24,
-          borderRadius: 12,
-          borderWidth: 1,
-          borderColor: '#333',
-          alignItems: 'center',
-          zIndex: 1000,
-        }}>
-        <Text
+      {!locationPermission && !locationLoading && (
+        <View
           style={{
-            color: '#fff',
-            fontSize: 18,
-            fontWeight: '600',
-            marginBottom: 8,
-            textAlign: 'center',
-          }}>
-          Location Required
-        </Text>
-        <Text
-          style={{
-            color: '#999',
-            fontSize: 14,
-            marginBottom: 16,
-            textAlign: 'center',
-          }}>
-          We need your location to find nearby currency exchange shops
-        </Text>
-        <Pressable
-          onPress={requestLocationPermission}
-          disabled={locationLoading}
-          style={{
-            padding: 16,
-            backgroundColor: 'rgb(249 218 71)',
+            marginTop: 24,
+            backgroundColor: "#1f1f1f",
+            padding: 24,
             borderRadius: 12,
-            minWidth: 200,
-            opacity: locationLoading ? 0.6 : 1,
-          }}>
-          {locationLoading ? (
-            <ActivityIndicator color="#000" />
-          ) : (
-            <Text
-              style={{
-                color: '#000',
-                fontSize: 16,
-                fontWeight: '700',
-                textAlign: 'center',
-              }}>
-              Use My Location
-            </Text>
-          )}
-        </Pressable>
-      </View>}
+            borderWidth: 1,
+            borderColor: "#333",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 18,
+              fontWeight: "600",
+              marginBottom: 8,
+              textAlign: "center",
+            }}
+          >
+            Location Required
+          </Text>
+          <Text
+            style={{
+              color: "#999",
+              fontSize: 14,
+              marginBottom: 16,
+              textAlign: "center",
+            }}
+          >
+            We need your location to find nearby currency exchange shops
+          </Text>
+          <Pressable
+            onPress={requestLocationPermission}
+            disabled={locationLoading}
+            style={{
+              padding: 16,
+              backgroundColor: "rgb(249 218 71)",
+              borderRadius: 12,
+              minWidth: 200,
+              opacity: locationLoading ? 0.6 : 1,
+            }}
+          >
+            {locationLoading ? (
+              <ActivityIndicator color="#000" />
+            ) : (
+              <Text
+                style={{
+                  color: "#000",
+                  fontSize: 16,
+                  fontWeight: "700",
+                  textAlign: "center",
+                }}
+              >
+                Use My Location
+              </Text>
+            )}
+          </Pressable>
+        </View>
+      )}
 
       {/* Map View */}
       {userLocation && !locationLoading && (
@@ -439,7 +477,7 @@ export default function Index() {
             }}
             uiSettings={{
               myLocationButtonEnabled: true,
-              scrollGesturesEnabled: true, 
+              scrollGesturesEnabled: true,
               zoomGesturesEnabled: true,
               zoomControlsEnabled: true,
               rotationGesturesEnabled: true,
@@ -455,12 +493,19 @@ export default function Index() {
                   latitude: shop.coordinates.latitude,
                   longitude: shop.coordinates.longitude,
                 },
+                icon: storeIcon ? storeIcon : undefined,
                 title: title,
-                snippet: `${formatDistance(shop.distance)} • Buy: ${shop.rates.buyRate.toFixed(4)} • Sell: ${shop.rates.sellRate.toFixed(4)}`,
+                snippet: `${formatDistance(
+                  shop.distance
+                )} • Buy: ${shop.rates.buyRate.toFixed(
+                  4
+                )} • Sell: ${shop.rates.sellRate.toFixed(4)}`,
               };
             })}
             onMarkerClick={(marker) => {
-              const shop = shops.find((s, idx) => `shop-marker-${s.id}-${idx}` === marker.id);
+              const shop = shops.find(
+                (s, idx) => `shop-marker-${s.id}-${idx}` === marker.id
+              );
               if (shop) {
                 handleMarkerPress(shop);
               }
