@@ -8,11 +8,13 @@ import {
   StyleSheet,
 } from 'react-native';
 
+import type { Currency } from '@/constants/currencies';
+
 interface CurrencyDropdownProps {
   label: string;
-  selectedCurrency: string;
-  currencies: string[];
-  onSelect: (currency: string) => void;
+  selectedCurrency: Currency;
+  currencies: Currency[];
+  onSelect: (currency: Currency) => void;
   disabled?: boolean;
 }
 
@@ -25,7 +27,7 @@ export function CurrencyDropdown({
 }: CurrencyDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSelect = (currency: string) => {
+  const handleSelect = (currency: Currency) => {
     onSelect(currency);
     setIsOpen(false);
   };
