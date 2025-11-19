@@ -1,28 +1,40 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Pressable,
+  Text,
+  View,
+  type GestureResponderEvent,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import BottomSheet from "@gorhom/bottom-sheet";
 
-import { SearchHeader } from "@/components/SearchHeader";
-import { SearchForm } from "@/components/SearchForm";
-import { LocationPermissionPrompt } from "@/components/LocationPermissionPrompt";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
-import { ShopMap } from "@/components/ShopMap";
+import { LocationPermissionPrompt } from "@/components/LocationPermissionPrompt";
+import { SearchForm } from "@/components/SearchForm";
 import { ShopDetailSheet } from "@/components/ShopDetailSheet";
+import { ShopListOverlay } from "@/components/ShopListOverlay";
+import { ShopMap, type ShopMapRef } from "@/components/ShopMap";
+import { type Currency } from "@/constants/currencies";
+import {
+  DEFAULT_FROM_CURRENCY,
+  DEFAULT_RADIUS,
+  DEFAULT_TO_CURRENCY,
+} from "@/constants/search";
 import { useLocation } from "@/hooks/useLocation";
 import { useMapCamera } from "@/hooks/useMapCamera";
 import { useShopSearch } from "@/hooks/useShopSearch";
-import { DEFAULT_RADIUS, DEFAULT_FROM_CURRENCY, DEFAULT_TO_CURRENCY } from "@/constants/search";
-import type { NearbyShop } from "@/types/shop-service.types";
 import { styles } from "@/styles/index.styles";
-import { type Currency } from "@/constants/currencies";
+import type { NearbyShop } from "@/types/shop-service.types";
 
 export default function Index() {
-  const [fromCurrency, setFromCurrency] = useState<Currency>(DEFAULT_FROM_CURRENCY);
+  const [fromCurrency, setFromCurrency] = useState<Currency>(
+    DEFAULT_FROM_CURRENCY
+  );
   const [toCurrency, setToCurrency] = useState<Currency>(DEFAULT_TO_CURRENCY);
   const [radius, setRadius] = useState(DEFAULT_RADIUS);
+  const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [selectedShop, setSelectedShop] = useState<NearbyShop | null>(null);
 
-  const bottomSheetRef = useRef<BottomSheet | null>(null);
+  const mapRef = useRef<ShopMapRef>(null);
 
   const {
     userLocation,
@@ -53,10 +65,19 @@ export default function Index() {
     }
   }, [radius, userLocation, setZoomFromRadius]);
 
-  // Handle marker press - open bottom sheet
-  const handleMarkerPress = useCallback((shop: NearbyShop) => {
+  // Handle shop click from overlay - focus map and open detail sheet
+  const handleShopPress = useCallback((shop: NearbyShop) => {
+    // Focus map on the selected shop
+    mapRef.current?.focusShop(shop);
+    setIsOverlayVisible(false);
     setSelectedShop(shop);
-    bottomSheetRef.current?.expand();
+  }, []);
+
+  const handleMarkerPress = useCallback((shop: NearbyShop) => {
+    // Focus map on the selected shop
+    mapRef.current?.focusShop(shop);
+    setIsOverlayVisible(false);
+    setSelectedShop(shop);
   }, []);
 
   // Handle radius change
@@ -64,12 +85,16 @@ export default function Index() {
     setRadius(newRadius);
   }, []);
 
+  // Toggle overlay visibility
+  const toggleOverlay = useCallback((event: GestureResponderEvent) => {
+    event.stopPropagation();
+    setIsOverlayVisible((prev) => !prev);
+  }, []);
+
   const locationAvailable = !!(latitude && longitude);
 
   return (
     <SafeAreaView edges={["bottom"]} style={styles.safeArea}>
-      <SearchHeader />
-
       <SearchForm
         fromCurrency={fromCurrency}
         toCurrency={toCurrency}
@@ -81,9 +106,7 @@ export default function Index() {
         loading={loading}
       />
 
-      {locationLoading && (
-        <LoadingIndicator message="Loading location..." />
-      )}
+      {locationLoading && <LoadingIndicator message="Loading location..." />}
 
       {!locationPermission && !locationLoading && (
         <LocationPermissionPrompt
@@ -93,20 +116,38 @@ export default function Index() {
       )}
 
       {userLocation && !locationLoading && (
-        <ShopMap
-          userLocation={userLocation}
-          shops={shops}
-          zoom={currentZoom}
-          onMarkerPress={handleMarkerPress}
-          bottomSheetRef={bottomSheetRef}
-        />
+        <View style={styles.mapContainer}>
+          <ShopMap
+            ref={mapRef}
+            userLocation={userLocation}
+            shops={shops}
+            zoom={currentZoom}
+            onMarkerPress={handleMarkerPress}
+          />
+
+          {/* Toggle Button for Overlay */}
+          {shops.length > 0 && !isOverlayVisible && (
+            <Pressable style={styles.toggleButton} onPress={toggleOverlay}>
+              <Text style={styles.toggleButtonText}>Show List</Text>
+            </Pressable>
+          )}
+
+          {/* Shop List Overlay */}
+          <ShopListOverlay
+            shops={shops}
+            visible={isOverlayVisible}
+            onShopPress={handleShopPress}
+            onToggle={toggleOverlay}
+          />
+        </View>
       )}
 
-      <ShopDetailSheet
-        shop={selectedShop}
-        bottomSheetRef={bottomSheetRef}
-        onClose={() => setSelectedShop(null)}
-      />
+      {selectedShop && (
+        <ShopDetailSheet
+          shop={selectedShop}
+          onClose={() => setSelectedShop(null)}
+        />
+      )}
     </SafeAreaView>
   );
 }

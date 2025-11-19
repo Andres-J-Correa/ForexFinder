@@ -1,7 +1,7 @@
-import { ScrollView, Text, View, StyleSheet } from "react-native";
 import { CurrencyDropdown } from "@/components/CurrencyDropdown";
 import { RadiusSelector } from "@/components/RadiusSelector";
 import { CURRENCIES, type Currency } from "@/constants/currencies";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 interface SearchFormProps {
   fromCurrency: Currency;
@@ -29,8 +29,7 @@ export function SearchForm({
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       nestedScrollEnabled={true}
-      showsVerticalScrollIndicator={false}
-    >
+      showsVerticalScrollIndicator={false}>
       {!locationAvailable && (
         <View style={styles.locationHint}>
           <Text style={styles.locationHintText}>
@@ -42,8 +41,7 @@ export function SearchForm({
         style={[
           styles.currencyRow,
           !locationAvailable && styles.currencyRowDisabled,
-        ]}
-      >
+        ]}>
         <CurrencyDropdown
           label="From"
           selectedCurrency={fromCurrency}
@@ -73,7 +71,7 @@ export function SearchForm({
 
 const styles = StyleSheet.create({
   container: {
-    maxHeight: 180,
+    maxHeight: 170,
   },
   contentContainer: {
     padding: 12,
@@ -95,4 +93,3 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
 });
-

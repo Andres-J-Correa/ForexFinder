@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Modal,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   View,
-  StyleSheet,
-} from 'react-native';
+} from "react-native";
 
-import type { Currency } from '@/constants/currencies';
+import type { Currency } from "@/constants/currencies";
 
 interface CurrencyDropdownProps {
   label: string;
@@ -38,20 +38,15 @@ export function CurrencyDropdown({
       <Pressable
         onPress={() => !disabled && setIsOpen(true)}
         disabled={disabled}
-        style={[
-          styles.dropdown,
-          disabled && styles.dropdownDisabled,
-        ]}>
+        style={[styles.dropdown, disabled && styles.dropdownDisabled]}>
         <Text
           style={[
             styles.dropdownText,
             disabled && styles.dropdownTextDisabled,
           ]}>
-          {selectedCurrency || 'Select...'}
+          {selectedCurrency || "Select..."}
         </Text>
-        <Text style={[styles.arrow, disabled && styles.arrowDisabled]}>
-          ▼
-        </Text>
+        <Text style={[styles.arrow, disabled && styles.arrowDisabled]}>▼</Text>
       </Pressable>
 
       <Modal
@@ -59,9 +54,7 @@ export function CurrencyDropdown({
         transparent
         animationType="fade"
         onRequestClose={() => setIsOpen(false)}>
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => setIsOpen(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setIsOpen(false)}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select {label}</Text>
@@ -76,12 +69,14 @@ export function CurrencyDropdown({
                   onPress={() => handleSelect(currency)}
                   style={[
                     styles.currencyItem,
-                    selectedCurrency === currency && styles.currencyItemSelected,
+                    selectedCurrency === currency &&
+                      styles.currencyItemSelected,
                   ]}>
                   <Text
                     style={[
                       styles.currencyText,
-                      selectedCurrency === currency && styles.currencyTextSelected,
+                      selectedCurrency === currency &&
+                        styles.currencyTextSelected,
                     ]}>
                     {currency}
                   </Text>
@@ -103,94 +98,93 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   label: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
     marginBottom: 8,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   dropdown: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#1f1f1f',
-    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#1f1f1f",
+    padding: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: "#333",
   },
   dropdownDisabled: {
     opacity: 0.5,
   },
   dropdownText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "500",
   },
   dropdownTextDisabled: {
-    color: '#999',
+    color: "#999",
   },
   arrow: {
-    color: '#999',
+    color: "#999",
     fontSize: 12,
   },
   arrowDisabled: {
-    color: '#666',
+    color: "#666",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: 'rgb(56 56 58)',
+    backgroundColor: "rgb(56 56 58)",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '70%',
+    maxHeight: "70%",
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: "#333",
   },
   modalTitle: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   closeButton: {
-    color: '#999',
+    color: "#999",
     fontSize: 24,
-    fontWeight: '300',
+    fontWeight: "300",
   },
   currencyList: {
     maxHeight: 400,
   },
   currencyItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: "#333",
   },
   currencyItemSelected: {
-    backgroundColor: 'rgba(249, 218, 71, 0.1)',
+    backgroundColor: "rgba(249, 218, 71, 0.1)",
   },
   currencyText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
   },
   currencyTextSelected: {
-    color: 'rgb(249 218 71)',
-    fontWeight: '700',
+    color: "rgb(249 218 71)",
+    fontWeight: "700",
   },
   checkmark: {
-    color: 'rgb(249 218 71)',
+    color: "rgb(249 218 71)",
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });
-

@@ -1,5 +1,5 @@
-import { Pressable, ScrollView, Text, View, StyleSheet } from "react-native";
 import { RADIUS_OPTIONS } from "@/constants/search";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 interface RadiusSelectorProps {
   selectedRadius: number;
@@ -18,8 +18,7 @@ export function RadiusSelector({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
+        contentContainerStyle={styles.scrollContent}>
         {RADIUS_OPTIONS.map((radiusOption) => (
           <Pressable
             key={radiusOption}
@@ -29,14 +28,12 @@ export function RadiusSelector({
               styles.button,
               selectedRadius === radiusOption && styles.buttonSelected,
               loading && styles.buttonDisabled,
-            ]}
-          >
+            ]}>
             <Text
               style={[
                 styles.buttonText,
                 selectedRadius === radiusOption && styles.buttonTextSelected,
-              ]}
-            >
+              ]}>
               {radiusOption % 1 === 0
                 ? `${radiusOption}km`
                 : `${radiusOption * 1000}m`}
@@ -50,11 +47,11 @@ export function RadiusSelector({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: 0,
   },
   label: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "600",
     marginBottom: 8,
   },
@@ -87,4 +84,3 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 });
-

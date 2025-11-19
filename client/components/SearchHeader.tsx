@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export function SearchHeader() {
   return (
@@ -10,15 +10,14 @@ export function SearchHeader() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#333",
   },
   title: {
     color: "#fff",
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "700",
     marginBottom: 4,
   },
 });
-
