@@ -96,7 +96,8 @@ export class ErrorBoundary extends Component<Props, State> {
           <View style={styles.content}>
             <Text style={styles.title}>Something went wrong</Text>
             <Text style={styles.message}>
-              We're sorry, but something unexpected happened. Please try again.
+              We&apos;re sorry, but something unexpected happened. Please try
+              again.
             </Text>
             {__DEV__ && this.state.error && (
               <View style={styles.errorDetails}>
@@ -185,4 +186,3 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-

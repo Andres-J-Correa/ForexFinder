@@ -59,8 +59,8 @@ export class ShopsController {
       contact: shop.contact,
       hours: shop.hours,
       coordinates: {
-        latitude: (shop.coordinates as any).coordinates[1],
-        longitude: (shop.coordinates as any).coordinates[0],
+        latitude: shop.coordinates.coordinates[1],
+        longitude: shop.coordinates.coordinates[0],
       },
       verified: shop.verified,
       dateCreated: shop.dateCreated,
@@ -117,8 +117,8 @@ export class ShopsController {
       contact: shop.contact,
       hours: shop.hours,
       coordinates: {
-        latitude: (shop.coordinates as any).coordinates[1],
-        longitude: (shop.coordinates as any).coordinates[0],
+        latitude: shop.coordinates.coordinates[1],
+        longitude: shop.coordinates.coordinates[0],
       },
       verified: shop.verified,
       dateCreated: shop.dateCreated,
@@ -147,15 +147,14 @@ export class ShopsController {
       contact: shop.contact,
       hours: shop.hours,
       coordinates: {
-        latitude: (shop.coordinates as any).coordinates[1],
-        longitude: (shop.coordinates as any).coordinates[0],
+        latitude: shop.coordinates.coordinates[1],
+        longitude: shop.coordinates.coordinates[0],
       },
       verified: shop.verified,
       dateCreated: shop.dateCreated,
       dateModified: shop.dateModified,
     };
   }
-
 
   @Public()
   @Get(':id')
@@ -172,8 +171,8 @@ export class ShopsController {
       contact: shop.contact,
       hours: shop.hours,
       coordinates: {
-        latitude: (shop.coordinates as any).coordinates[1],
-        longitude: (shop.coordinates as any).coordinates[0],
+        latitude: shop.coordinates.coordinates[1],
+        longitude: shop.coordinates.coordinates[0],
       },
       verified: shop.verified,
       dateCreated: shop.dateCreated,
@@ -200,9 +199,7 @@ export class ShopsController {
       throw new NotFoundException('Shop not found');
     }
     if (shop.ownerUserId !== user.sub) {
-      throw new ForbiddenException(
-        'You can only update your own shop',
-      );
+      throw new ForbiddenException('You can only update your own shop');
     }
 
     const updatedShop = await this.shopsService.updateShop(id, dto);
@@ -213,8 +210,8 @@ export class ShopsController {
       contact: updatedShop.contact,
       hours: updatedShop.hours,
       coordinates: {
-        latitude: (updatedShop.coordinates as any).coordinates[1],
-        longitude: (updatedShop.coordinates as any).coordinates[0],
+        latitude: updatedShop.coordinates.coordinates[1],
+        longitude: updatedShop.coordinates.coordinates[0],
       },
       verified: updatedShop.verified,
       dateCreated: updatedShop.dateCreated,

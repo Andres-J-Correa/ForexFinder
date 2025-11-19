@@ -150,10 +150,7 @@ export class ShopsService {
     );
 
     // Mark token as used
-    await this.locationTokensService.markTokenAsUsed(
-      tokenRecord.id,
-      shop.id,
-    );
+    await this.locationTokensService.markTokenAsUsed(tokenRecord.id, shop.id);
 
     return shop;
   }
@@ -227,10 +224,7 @@ export class ShopsService {
         sellScore: parseFloat(row.sellScore),
       }));
     } catch (error) {
-      this.logger.error(
-        'Failed to find nearby shops',
-        (error as Error).stack,
-      );
+      this.logger.error('Failed to find nearby shops', (error as Error).stack);
       throw new InternalServerErrorException('Failed to search nearby shops');
     }
   }

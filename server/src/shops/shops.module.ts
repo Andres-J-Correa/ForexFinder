@@ -7,10 +7,7 @@ import Shop from './entities/shop.entity';
 import { LocationTokensModule } from '@/location-tokens/location-tokens.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Shop]),
-    LocationTokensModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Shop]), LocationTokensModule],
   controllers: [ShopsController],
   providers: [ShopsService],
   exports: [TypeOrmModule, ShopsService],
