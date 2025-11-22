@@ -80,24 +80,7 @@ export class ShopsController {
       query.toCurrency,
     );
 
-    return shops.map((shop) => ({
-      id: shop.id,
-      name: shop.name,
-      contact: shop.contact,
-      hours: shop.hours,
-      coordinates: {
-        latitude: shop.latitude,
-        longitude: shop.longitude,
-      },
-      distance: Math.round(shop.distance), // in meters
-      rates: {
-        fromCurrency: query.fromCurrency.toUpperCase(),
-        toCurrency: query.toCurrency.toUpperCase(),
-        buyRate: shop.buyRate,
-        sellRate: shop.sellRate,
-        rateAge: Math.round(shop.rateAge * 10) / 10, // Round to 1 decimal
-      },
-    }));
+    return shops;
   }
 
   @Get('my-shops')
@@ -193,12 +176,9 @@ export class ShopsController {
       throw new UnauthorizedException('User must be authenticated');
     }
 
-    // Verify shop ownership
-    const shop = await this.shopsService.getShopById(id);
-    if (!shop) {
-      throw new NotFoundException('Shop not found');
-    }
-    if (shop.ownerUserId !== user.sub) {
+    const isOwner = await this.shopsService.isOwner(user.sub, id);
+
+    if (isOwner) {
       throw new ForbiddenException('You can only update your own shop');
     }
 

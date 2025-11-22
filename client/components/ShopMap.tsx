@@ -1,5 +1,4 @@
 import type { NearbyShop } from "@/types/shop-service.types";
-import { formatDistance } from "@/utils/map-helpers";
 import { useImage } from "expo-image";
 import { GoogleMaps, type CameraPosition } from "expo-maps";
 import React, {
@@ -20,6 +19,7 @@ interface ShopMapProps {
   shops: NearbyShop[];
   zoom: number;
   onMarkerPress: (shop: NearbyShop) => void;
+  selectedShopId?: number;
 }
 
 export interface ShopMapRef {
@@ -27,9 +27,12 @@ export interface ShopMapRef {
 }
 
 export const ShopMap = React.forwardRef<ShopMapRef, ShopMapProps>(
-  ({ userLocation, shops, zoom, onMarkerPress }, ref) => {
+  ({ userLocation, shops, zoom, onMarkerPress, selectedShopId }, ref) => {
     const mapRef = useRef<GoogleMaps.MapView>(null);
     const storeIcon = useImage(require("../assets/images/store.png"));
+    const selectedStoreIcon = useImage(
+      require("../assets/images/selected-store.png")
+    );
     const [cameraPosition, setCameraPosition] = useState<CameraPosition>({
       coordinates: {
         latitude: userLocation.latitude,
@@ -61,12 +64,14 @@ export const ShopMap = React.forwardRef<ShopMapRef, ShopMapProps>(
       focusShop: (shop: NearbyShop) => {
         // Focus on shop with a closer zoom level
         const focusZoom = 15; // Closer zoom for individual shop
-        setCameraPosition({
+
+        mapRef.current?.setCameraPosition({
           coordinates: {
             latitude: shop.coordinates.latitude,
             longitude: shop.coordinates.longitude,
           },
           zoom: focusZoom,
+          duration: 500,
         });
       },
     }));
@@ -105,21 +110,19 @@ export const ShopMap = React.forwardRef<ShopMapRef, ShopMapProps>(
             mapToolbarEnabled: true,
           }}
           markers={shops.map((shop, index) => {
-            const isBestRate = index === 0; // First shop in list is the best rate
-            const title = isBestRate ? `⭐ ${shop.name}` : shop.name;
+            const icon =
+              selectedShopId === shop.id
+                ? selectedStoreIcon ?? undefined
+                : storeIcon ?? undefined;
+
             return {
               id: `${shopIdPrefix}-${shop.id}-${index}`,
               coordinates: {
                 latitude: shop.coordinates.latitude,
                 longitude: shop.coordinates.longitude,
               },
-              icon: storeIcon ? storeIcon : undefined,
-              title: title,
-              snippet: `${formatDistance(
-                shop.distance
-              )} • Buy: ${shop.rates.buyRate.toFixed(
-                4
-              )} • Sell: ${shop.rates.sellRate.toFixed(4)}`,
+              icon: icon,
+              showCallout: false,
             };
           })}
         />

@@ -33,6 +33,7 @@ export default function Index() {
   const [radius, setRadius] = useState(DEFAULT_RADIUS);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [selectedShop, setSelectedShop] = useState<NearbyShop | null>(null);
+  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
 
   const mapRef = useRef<ShopMapRef>(null);
 
@@ -78,17 +79,20 @@ export default function Index() {
     mapRef.current?.focusShop(shop);
     setIsOverlayVisible(false);
     setSelectedShop(shop);
+    setIsBottomSheetVisible(true);
   }, []);
 
   // Handle radius change
   const handleRadiusChange = useCallback((newRadius: number) => {
     setRadius(newRadius);
+    setSelectedShop(null);
   }, []);
 
   // Toggle overlay visibility
   const toggleOverlay = useCallback((event: GestureResponderEvent) => {
     event.stopPropagation();
     setIsOverlayVisible((prev) => !prev);
+    setIsBottomSheetVisible(false);
   }, []);
 
   const locationAvailable = !!(latitude && longitude);
@@ -123,6 +127,7 @@ export default function Index() {
             shops={shops}
             zoom={currentZoom}
             onMarkerPress={handleMarkerPress}
+            selectedShopId={selectedShop?.id}
           />
 
           {/* Toggle Button for Overlay */}
@@ -142,10 +147,10 @@ export default function Index() {
         </View>
       )}
 
-      {selectedShop && (
+      {selectedShop && isBottomSheetVisible && (
         <ShopDetailSheet
           shop={selectedShop}
-          onClose={() => setSelectedShop(null)}
+          onClose={() => setIsBottomSheetVisible(false)}
         />
       )}
     </SafeAreaView>

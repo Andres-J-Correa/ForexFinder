@@ -1,5 +1,6 @@
 export default {
   expo: {
+    owner: "andres_dev94",
     name: "ForexFinder",
     slug: "ForexFinder",
     version: "1.0.0",
@@ -30,7 +31,7 @@ export default {
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
-      package: "com.andres_correa94.ForexFinder",
+      package: "com.andres_dev94.ForexFinder",
       permissions: ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
     },
     web: {
@@ -83,7 +84,7 @@ export default {
     extra: {
       router: {},
       eas: {
-        projectId: "fee52ee9-7dc4-441b-b1f6-86405ce6c964",
+        projectId: "8c189a4a-e01c-4565-a8d1-ed58d4441bb1",
       },
     },
   },

@@ -17,7 +17,7 @@ interface ShopDetailSheetProps {
 }
 
 export function ShopDetailSheet({ shop, onClose }: ShopDetailSheetProps) {
-  const snapPoints = useMemo(() => ["50%", "90%"], []);
+  const snapPoints = useMemo(() => ["30%", "90%"], []);
 
   const handleSheetChanges = useCallback(
     (index: number) => {
@@ -54,7 +54,7 @@ export function ShopDetailSheet({ shop, onClose }: ShopDetailSheetProps) {
       handleIndicatorStyle={{ backgroundColor: "rgb(249 218 71)" }}>
       <BottomSheetScrollView
         style={{ flex: 1, padding: 16, paddingBottom: 24 }}>
-        <SafeAreaView>
+        <SafeAreaView edges={["bottom"]} style={{ flex: 1 }}>
           <ScrollView showsVerticalScrollIndicator={false}>
             <View style={{ marginBottom: 16 }}>
               <Text

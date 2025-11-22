@@ -1,0 +1,43 @@
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Docker Compose reference guide at
+# https://docs.docker.com/go/compose-spec-reference/
+
+# Here the instructions define your application as a service called "server".
+# This service is built from the Dockerfile in the current directory.
+# You can add other services your application may depend on here, such as a
+# database or a cache. For examples, see the Awesome Compose repository:
+# https://github.com/docker/awesome-compose
+services:
+  server:
+    build:
+      context: .
+    depends_on:
+      - postgis
+    restart: always
+    environment:
+      NODE_ENV: development
+    env_file:
+      - .env.development
+    ports:
+      - 3000:3000
+
+  postgis:
+    image: postgis/postgis
+    restart: always
+    environment:
+      - POSTGRES_DB=forex_finder
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data/postgis:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U postgres -d forex_finder -h localhost || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5

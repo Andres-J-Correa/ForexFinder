@@ -10,21 +10,8 @@ import { Point } from 'typeorm';
 
 import Shop from './entities/shop.entity';
 import { LocationTokensService } from '@/location-tokens/location-tokens.service';
-
-interface NearbyShopResult {
-  id: number;
-  name: string;
-  contact: string | null;
-  hours: string | null;
-  latitude: number;
-  longitude: number;
-  distance: number; // in meters
-  buyRate: number;
-  sellRate: number;
-  rateAge: number; // in days
-  buyScore: number;
-  sellScore: number;
-}
+import { NearbyShop } from './types/NearbyShop.types';
+import { NearbyShopsResponse } from './types/NearbyShopsResponse';
 
 @Injectable()
 export class ShopsService {
@@ -155,13 +142,21 @@ export class ShopsService {
     return shop;
   }
 
+  async isOwner(userId: number, shopId: number): Promise<boolean> {
+    const shop = await this.shopRepository.findOne({
+      select: ['ownerUserId'],
+      where: { id: shopId },
+    });
+    return shop?.ownerUserId === userId;
+  }
+
   async findNearbyShops(
     latitude: number,
     longitude: number,
     radiusKm: number,
     fromCurrency: string,
     toCurrency: string,
-  ): Promise<NearbyShopResult[]> {
+  ): Promise<NearbyShopsResponse[]> {
     try {
       const radiusMeters = radiusKm * 1000;
       const maxAgeDays = 7;
@@ -200,28 +195,35 @@ export class ShopsService {
         LIMIT 10
       `;
 
-      const results = await this.shopRepository.query(query, [
-        longitude, // $1
-        latitude, // $2
-        radiusMeters, // $3
-        fromCurrency.toUpperCase(), // $4
-        toCurrency.toUpperCase(), // $5
-        penaltyFactor, // $6 (used in score calculation)
+      const fromCurrencyUpper = fromCurrency.toUpperCase();
+      const toCurrencyUpper = toCurrency.toUpperCase();
+
+      const results = await this.shopRepository.query<NearbyShop[]>(query, [
+        longitude,
+        latitude,
+        radiusMeters,
+        fromCurrencyUpper,
+        toCurrencyUpper,
+        penaltyFactor,
       ]);
 
-      return results.map((row: any) => ({
-        id: row.id,
-        name: row.name,
-        contact: row.contact,
-        hours: row.hours,
-        latitude: parseFloat(row.latitude),
-        longitude: parseFloat(row.longitude),
-        distance: parseFloat(row.distance),
-        buyRate: parseFloat(row.buyRate),
-        sellRate: parseFloat(row.sellRate),
-        rateAge: parseFloat(row.rateAge),
-        buyScore: parseFloat(row.buyScore),
-        sellScore: parseFloat(row.sellScore),
+      return results.map((shop) => ({
+        id: shop.id,
+        name: shop.name,
+        contact: shop.contact,
+        hours: shop.hours,
+        coordinates: {
+          latitude: shop.latitude,
+          longitude: shop.longitude,
+        },
+        distance: Math.round(shop.distance), // in meters
+        rates: {
+          fromCurrency: fromCurrencyUpper,
+          toCurrency: toCurrencyUpper,
+          buyRate: parseFloat(shop.buyRate),
+          sellRate: parseFloat(shop.sellRate),
+          rateAge: Math.round(shop.rateAge * 10) / 10, // Round to 1 decimal
+        },
       }));
     } catch (error) {
       this.logger.error('Failed to find nearby shops', (error as Error).stack);
