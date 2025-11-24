@@ -5,9 +5,9 @@ declare namespace NodeJS {
     DB_TYPE: 'postgres';
     DB_HOST: string;
     DB_PORT: number;
-    DB_USERNAME: string;
-    DB_PASSWORD: string;
-    DB_NAME: string;
+    POSTGRES_USER: string;
+    POSTGRES_PASSWORD: string;
+    POSTGRES_DB: string;
     DB_SYNCHRONIZE: boolean;
     AUTH_JWT_SECRET: string;
     AUTH_JWT_EXPIRES_IN: string;
