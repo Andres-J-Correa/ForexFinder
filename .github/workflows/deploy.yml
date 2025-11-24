@@ -1,0 +1,56 @@
+name: Deploy ForexFinder Server to VPS (Prod)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    if: false # temporarily disable
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            # Stop script on error
+            set -e
+
+            # Navigate to project directory
+            # Ensure this path matches your VPS directory structure
+            cd ~/ForexFinder/server
+
+            # Pull latest changes
+            echo "Pulling latest changes..."
+            git checkout main
+            git pull origin main
+
+            # Create .env file from secrets
+            # You should add all your production environment variables here
+            echo "Creating .env file..."
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "AUTH_JWT_SECRET=${{ secrets.AUTH_JWT_SECRET }}" >> .env
+            echo "AUTH_JWT_REFRESH_SECRET=${{ secrets.AUTH_JWT_REFRESH_SECRET }}" >> .env
+            echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> .env
+            echo "GOOGLE_OAUTH_SECRET=${{ secrets.GOOGLE_OAUTH_SECRET }}" >> .env
+            echo "LOCATION_TOKEN_SECRET=${{ secrets.LOCATION_TOKEN_SECRET }}" >> .env
+
+            # Build and restart services
+            echo "Building and restarting services..."
+            docker compose --profile prod up -d --build
+
+            # Clean up unused images
+            echo "Cleaning up..."
+            docker image prune -f
+
+            echo "Deployment successful!"

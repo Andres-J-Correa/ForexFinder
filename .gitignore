@@ -14,10 +14,8 @@ server/yarn-error.log*
 server/lerna-debug.log*
 
 # dotenv environment variable files
-server/.env
 server/.env.development
 server/.env.test
-server/.env.production
 
 # temp directory
 server/.temp
@@ -53,3 +51,6 @@ client/npm-debug.*
 client/*.tsbuildinfo
 
 client/app-example
+
+# server/database
+server/data/**

@@ -122,7 +122,6 @@ export const ShopMap = React.forwardRef<ShopMapRef, ShopMapProps>(
                 longitude: shop.coordinates.longitude,
               },
               icon: icon,
-              showCallout: false,
             };
           })}
         />
