@@ -7,7 +7,6 @@ on:
 
 jobs:
   deploy:
-    if: false # temporarily disable
     runs-on: ubuntu-latest
 
     steps:
@@ -26,16 +25,16 @@ jobs:
             set -e
 
             # Navigate to project directory
-            # Ensure this path matches your VPS directory structure
-            cd ~/ForexFinder/server
+            cd ~/ForexFinder
 
             # Pull latest changes
             echo "Pulling latest changes..."
-            git checkout main
-            git pull origin main
+            git checkout main || { echo "git checkout main failed"; exit 1; }
+            git fetch origin main || { echo "git fetch origin main failed"; exit 1; }
+            git reset --hard origin/main || { echo "git reset --hard origin/main failed"; exit 1; }
 
             # Create .env file from secrets
-            # You should add all your production environment variables here
+            cd server
             echo "Creating .env file..."
             echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
