@@ -9,7 +9,6 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-COPY public ./public
 
 # Build the application
 RUN npm run build
@@ -28,6 +27,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy built assets from builder stage
 COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/public ./public
 
 EXPOSE 3000
 
