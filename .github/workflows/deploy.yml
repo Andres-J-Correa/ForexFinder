@@ -35,7 +35,6 @@ jobs:
 
             # Create .env file from secrets
             cd server
-            echo "Creating .env file..."
             echo "POSTGRES_USER=${{ secrets.DB_USERNAME }}" >> .env
             echo "POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
             echo "AUTH_JWT_SECRET=${{ secrets.AUTH_JWT_SECRET }}" >> .env
