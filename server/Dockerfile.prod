@@ -28,6 +28,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 # Copy built assets from builder stage
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/public ./public
+COPY --from=builder /usr/src/app/assets ./assets
 
 EXPOSE 3000
 
