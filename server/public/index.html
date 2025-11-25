@@ -1,375 +1,438 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ForexFinder - Find Best Exchange Rates</title>
-    <meta name="description" content="Find the best foreign exchange rates nearby. ForexFinder connects travelers with local money changers.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <meta
+      name="description"
+      content="Find the best foreign exchange rates nearby. ForexFinder connects travelers with local money changers."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        :root {
-            --primary: rgb(249, 218, 71);
-            --primary-dark: rgb(229, 198, 51);
-            --secondary: #10b981;
-            --dark: rgb(56, 56, 58);
-            --light: #f8fafc;
-            --gray: #94a3b8;
-            --gradient: linear-gradient(135deg, rgb(56, 56, 58) 0%, rgb(36, 36, 38) 100%);
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-        }
+      :root {
+        --primary: rgb(249, 218, 71);
+        --primary-dark: rgb(229, 198, 51);
+        --secondary: #10b981;
+        --dark: rgb(56, 56, 58);
+        --light: #f8fafc;
+        --gray: #94a3b8;
+        --gradient: linear-gradient(
+          135deg,
+          rgb(56, 56, 58) 0%,
+          rgb(36, 36, 38) 100%
+        );
+        --glass: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+      }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--dark);
-            color: var(--light);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--dark);
+        color: var(--light);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
 
-        /* Header */
-        header {
-            padding: 2rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: absolute;
-            width: 100%;
-            z-index: 10;
-        }
+      /* Header */
+      header {
+        padding: 2rem 5%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: absolute;
+        width: 100%;
+        z-index: 10;
+      }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--light);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--light);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
 
-        .logo span {
-            color: var(--primary-dark);
-        }
+      .logo span {
+        color: var(--primary-dark);
+      }
 
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 0 5%;
-            background: var(--gradient);
-            position: relative;
-        }
+      /* Hero Section */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0 5%;
+        background: var(--gradient);
+        position: relative;
+      }
 
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(249, 218, 71, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-        }
+      .hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(249, 218, 71, 0.1) 0%,
+          transparent 50%
+        );
+        pointer-events: none;
+      }
 
-        .hero-content {
-            max-width: 1000px;
-            z-index: 1;
-            animation: fadeIn 1s ease-out;
-        }
+      .hero-content {
+        max-width: 1000px;
+        z-index: 1;
+        animation: fadeIn 1s ease-out;
+      }
 
-        h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            line-height: 1.2;
-            background: linear-gradient(to right, #fff, #94a3b8);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+      h1 {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+        background: linear-gradient(to right, #fff, #94a3b8);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
 
-        .subtitle {
-            font-size: 1.25rem;
-            color: var(--gray);
-            margin-bottom: 3rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+      .subtitle {
+        font-size: 1.25rem;
+        color: var(--gray);
+        margin-bottom: 3rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
 
+      .cta-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4rem;
+        margin-top: 3rem;
+      }
+
+      .cta-screenshots {
+        display: flex;
+        gap: 1rem;
+        perspective: 1000px;
+      }
+
+      .cta-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        background-color: var(--primary);
+        color: var(--dark);
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(249, 218, 71, 0.3);
+      }
+
+      .btn:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(249, 218, 71, 0.4);
+      }
+
+      .qr-container {
+        background: white;
+        padding: 1rem;
+        border-radius: 1rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        margin-top: 1rem;
+      }
+
+      .qr-code {
+        width: 150px;
+        height: 150px;
+        display: block;
+      }
+
+      .scan-text {
+        margin-top: 0.5rem;
+        color: var(--dark);
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .screenshot-frame {
+        width: 180px;
+        height: 360px;
+        background-color: #000;
+        border-radius: 20px;
+        border: 5px solid #333;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        transition: transform 0.3s ease;
+      }
+
+      .screenshot-frame:hover {
+        transform: translateY(-10px) scale(1.02);
+        z-index: 10;
+      }
+
+      .screenshot-frame:nth-child(2) {
+        transform: translateY(-20px);
+      }
+
+      .screenshot-frame:nth-child(2):hover {
+        transform: translateY(-30px) scale(1.02);
+      }
+
+      .screenshot-placeholder {
+        width: 100%;
+        height: 100%;
+        background: #222;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--gray);
+        font-size: 0.9rem;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .screenshot-placeholder svg {
+        width: 32px;
+        height: 32px;
+        opacity: 0.5;
+      }
+
+      .screenshot-img {
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+        display: block;
+      }
+
+      @media (max-width: 1024px) {
         .cta-group {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4rem;
-            margin-top: 3rem;
-        }
-
-        .cta-screenshots {
-            display: flex;
-            gap: 1rem;
-            perspective: 1000px;
-        }
-
-        .cta-actions {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            background-color: var(--primary);
-            color: var(--dark);
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(249, 218, 71, 0.3);
-        }
-
-        .btn:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(249, 218, 71, 0.4);
-        }
-
-        .qr-container {
-            background: white;
-            padding: 1rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            margin-top: 1rem;
-        }
-
-        .qr-code {
-            width: 150px;
-            height: 150px;
-            display: block;
-        }
-
-        .scan-text {
-            margin-top: 0.5rem;
-            color: var(--dark);
-            font-size: 0.875rem;
-            font-weight: 500;
+          flex-direction: column-reverse;
+          gap: 3rem;
         }
 
         .screenshot-frame {
-            width: 180px;
-            height: 360px;
-            background-color: #000;
-            border-radius: 20px;
-            border: 5px solid #333;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            transition: transform 0.3s ease;
+          width: 140px;
+          height: 280px;
         }
+      }
 
-        .screenshot-frame:hover {
-            transform: translateY(-10px) scale(1.02);
-            z-index: 10;
-        }
+      /* Features Section */
+      .features {
+        padding: 5rem 5%;
+        background-color: rgba(0, 0, 0, 0.2);
+      }
 
-        .screenshot-frame:nth-child(2) {
-            transform: translateY(-20px);
-        }
-        
-        .screenshot-frame:nth-child(2):hover {
-            transform: translateY(-30px) scale(1.02);
-        }
+      .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 4rem;
+      }
 
-        .screenshot-placeholder {
-            width: 100%;
-            height: 100%;
-            background: #222;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--gray);
-            font-size: 0.9rem;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
 
-        .screenshot-placeholder svg {
-            width: 32px;
-            height: 32px;
-            opacity: 0.5;
-        }
+      .card {
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 2rem;
+        border-radius: 1rem;
+        transition: transform 0.3s ease;
+      }
 
-        .screenshot-img {
-            width: 100%;
-            height: 100%;
-            object-fit: fill;
-            display: block;
-        }
+      .card:hover {
+        transform: translateY(-5px);
+        background: rgba(30, 41, 59, 0.8);
+      }
 
-        @media (max-width: 1024px) {
-            .cta-group {
-                flex-direction: column-reverse;
-                gap: 3rem;
-            }
-            
-            .screenshot-frame {
-                width: 140px;
-                height: 280px;
-            }
-        }
+      .card-icon {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        color: var(--secondary);
+      }
 
-        /* Features Section */
-        .features {
-            padding: 5rem 5%;
-            background-color: rgba(0, 0, 0, 0.2);
-        }
+      .card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--light);
+      }
 
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 4rem;
-        }
+      .card p {
+        color: var(--gray);
+      }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+      /* Footer */
+      footer {
+        padding: 2rem 5%;
+        text-align: center;
+        color: var(--gray);
+        font-size: 0.875rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      }
 
-        .card {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 2rem;
-            border-radius: 1rem;
-            transition: transform 0.3s ease;
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
         }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-        .card:hover {
-            transform: translateY(-5px);
-            background: rgba(30, 41, 59, 0.8);
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 2.5rem;
         }
-
-        .card-icon {
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            color: var(--secondary);
+        .hero {
+          padding-top: 4rem;
         }
-
-        .card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--light);
-        }
-
-        .card p {
-            color: var(--gray);
-        }
-
-        /* Footer */
-        footer {
-            padding: 2rem 5%;
-            text-align: center;
-            color: var(--gray);
-            font-size: 0.875rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 768px) {
-            h1 { font-size: 2.5rem; }
-            .hero { padding-top: 4rem; }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <header>
-        <a href="#" class="logo">Forex<span>Finder</span></a>
+      <a href="#" class="logo">Forex<span>Finder</span></a>
     </header>
 
     <section class="hero">
-        <div class="hero-content">
-            <h1>Smart Currency Exchange Finding</h1>
-            <p class="subtitle">Don't settle for bad rates. Find the best foreign exchange shops near you instantly. For travelers and shop owners.</p>
-            
-            <div class="cta-group">
-                <div class="cta-screenshots">
-                    <div class="screenshot-frame">
-                        <img src="/assets/main.png" alt="ForexFinder Home Screen" class="screenshot-img">
-                    </div>
-                    <div class="screenshot-frame">
-                        <img src="/assets/shops-list.png" alt="ForexFinder Shop List" class="screenshot-img">
-                    </div>
-                    <div class="screenshot-frame">
-                        <img src="/assets/shops-view.png" alt="ForexFinder Map View" class="screenshot-img">
-                    </div>
-                </div>
+      <div class="hero-content">
+        <h1>Smart Currency Exchange Finding</h1>
+        <p class="subtitle">
+          Don't settle for bad rates. Find the best foreign exchange shops near
+          you instantly. For travelers and shop owners.
+        </p>
 
-                <div class="cta-actions">
-                    <a href="https://apkpure.com/p/com.andres_dev94.ForexFinder" target="_blank" class="btn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        Download on APK Pure
-                    </a>
-                    
-                    <div class="qr-container">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://apkpure.com/p/com.andres_dev94.ForexFinder&color=000000&bgcolor=FFFFFF" alt="Download QR Code" class="qr-code">
-                        <p class="scan-text">Scan to Download</p>
-                    </div>
-                </div>
+        <div class="cta-group">
+          <div class="cta-screenshots">
+            <div class="screenshot-frame">
+              <img
+                src="/assets/main.png"
+                alt="ForexFinder Home Screen"
+                class="screenshot-img"
+              />
             </div>
+            <div class="screenshot-frame">
+              <img
+                src="/assets/shops-list.png"
+                alt="ForexFinder Shop List"
+                class="screenshot-img"
+              />
+            </div>
+            <div class="screenshot-frame">
+              <img
+                src="/assets/shops-view.png"
+                alt="ForexFinder Map View"
+                class="screenshot-img"
+              />
+            </div>
+          </div>
+
+          <div class="cta-actions">
+            <a
+              href="https://expo.dev/accounts/andres_dev94/projects/ForexFinder/builds/3c13be51-a1c0-4a56-b94e-2635e9e492a2"
+              target="_blank"
+              class="btn"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Download on App
+            </a>
+
+            <div class="qr-container">
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://expo.dev/accounts/andres_dev94/projects/ForexFinder/builds/3c13be51-a1c0-4a56-b94e-2635e9e492a2&color=000000&bgcolor=FFFFFF"
+                alt="Download QR Code"
+                class="qr-code"
+              />
+              <p class="scan-text">Scan to Download</p>
+            </div>
+          </div>
         </div>
+      </div>
     </section>
 
-
-
     <section class="features">
-        <h2 class="section-title">Why ForexFinder?</h2>
-        <div class="grid">
-            <div class="card">
-                <div class="card-icon">📍</div>
-                <h3>Find Nearby Shops</h3>
-                <p>Instantly locate the closest currency exchange shops with the best rates. No more walking around blindly.</p>
-            </div>
-            <div class="card">
-                <div class="card-icon">💰</div>
-                <h3>Compare Rates</h3>
-                <p>See real-time exchange rates from multiple shops to ensure you get the most value for your money.</p>
-            </div>
-            <div class="card">
-                <div class="card-icon">📈</div>
-                <h3>For Shop Owners</h3>
-                <p>Register your shop, update your rates, and attract more customers beyond just foot traffic.</p>
-            </div>
+      <h2 class="section-title">Why ForexFinder?</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="card-icon">📍</div>
+          <h3>Find Nearby Shops</h3>
+          <p>
+            Instantly locate the closest currency exchange shops with the best
+            rates. No more walking around blindly.
+          </p>
         </div>
+        <div class="card">
+          <div class="card-icon">💰</div>
+          <h3>Compare Rates</h3>
+          <p>
+            See real-time exchange rates from multiple shops to ensure you get
+            the most value for your money.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📈</div>
+          <h3>For Shop Owners</h3>
+          <p>
+            Register your shop, update your rates, and attract more customers
+            beyond just foot traffic.
+          </p>
+        </div>
+      </div>
     </section>
 
     <footer>
-        <p>&copy; 2025 ForexFinder. All rights reserved.</p>
+      <p>&copy; 2025 ForexFinder. All rights reserved.</p>
     </footer>
-</body>
+  </body>
 </html>
