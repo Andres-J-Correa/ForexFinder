@@ -307,6 +307,17 @@
         border-top: 1px solid rgba(255, 255, 255, 0.05);
       }
 
+      footer a {
+        color: var(--gray);
+        text-decoration: none;
+        margin-left: 0.5rem;
+        transition: color 0.3s ease;
+      }
+
+      footer a:hover {
+        color: var(--primary);
+      }
+
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -433,7 +444,10 @@
     </section>
 
     <footer>
-      <p>&copy; 2025 ForexFinder. All rights reserved.</p>
+      <p>
+        &copy; 2025 ForexFinder. All rights reserved.
+        <a href="/privacy-policy">Privacy Policy</a>
+      </p>
     </footer>
   </body>
 </html>
